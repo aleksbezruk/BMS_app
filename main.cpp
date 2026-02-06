@@ -9,11 +9,24 @@
 
 #include "BLE/blemanager.h"
 
+#include <QPermissions>
+
 int main(int argc, char *argv[])
 {
     // Initialize the application. This handles system-specific setup
     // (like high-DPI scaling, parsing command line args).
     QGuiApplication app(argc, argv);
+
+#ifdef Q_OS_ANDROID
+    // Runtime permission
+    QBluetoothPermission perm;
+    perm.setCommunicationModes(QBluetoothPermission::Access);
+
+    app.requestPermission(perm, [](const QPermission &p){
+        qDebug() << "BLE permission:"
+                 << (p.status() == Qt::PermissionStatus::Granted);
+    });
+#endif
 
     // Create the QML engine. This is the interpreter for your UI.
     QQmlApplicationEngine engine;

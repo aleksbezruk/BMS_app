@@ -18,12 +18,29 @@ static void _stopScan(BleScannerWorker* scanner);
 BleScannerWorker::BleScannerWorker(QObject *parent)
     : QObject(parent)
 {
+    // open BLE adapter
+    _openAdapter(this);
 }
 
 void BleScannerWorker::initAdapter()
 {
-    // TODO: impplement for QtBluetooth
-    this->adapter_ = NULL;
+    this->adapter_ = new QBluetoothDeviceDiscoveryAgent(this);
+    this->adapter_->setLowEnergyDiscoveryTimeout(15000);
+
+    connect(this->adapter_,
+            &QBluetoothDeviceDiscoveryAgent::deviceDiscovered,
+            this,
+            &BleScannerWorker::deviceDiscovered);
+
+    connect(this->adapter_,
+            &QBluetoothDeviceDiscoveryAgent::finished,
+            this,
+            &BleScannerWorker::scanFinished);
+
+    connect(this->adapter_,
+            &QBluetoothDeviceDiscoveryAgent::canceled,
+            this,
+            &BleScannerWorker::onStopped);
 }
 
 void BleScannerWorker::startScan()
@@ -32,9 +49,6 @@ void BleScannerWorker::startScan()
     // MUST be called inside the worker thread
     winrt::init_apartment(winrt::apartment_type::multi_threaded);
 #endif
-
-    // open BLE adapter
-    _openAdapter(this);
 
     stopRequested_ = false;
     scanning_ = true;
@@ -54,6 +68,7 @@ void BleScannerWorker::stopScan()
 
     scanning_ = false;      // 🔒 FIRST
     stopRequested_ = true;
+    emit scanStopped();
 
     // stop scan on BLE adapter
     _stopScan(this);
@@ -65,6 +80,67 @@ BleScannerWorker::~BleScannerWorker()
 
     // Give WinRT time to drain callbacks
     QThread::msleep(50);
+}
+
+void BleScannerWorker::onStopped()
+{
+    qDebug() << "Scan stopped manually";
+}
+
+void BleScannerWorker::deviceDiscovered(const QBluetoothDeviceInfo &info)
+{
+    if (!(info.coreConfigurations()
+          & QBluetoothDeviceInfo::LowEnergyCoreConfiguration))
+    {
+        return;
+    }
+
+    QString name = info.name().isEmpty()
+                       ? "Unknown"
+                       : info.name();
+    QString addr = info.address().toString();
+
+    emit this->deviceFound(
+        addr,
+        name
+    );
+}
+
+void BleScannerWorker::scanFinished()
+{
+    emit scanStopped();
+    qDebug() << "Scan finished";
+}
+
+static void _stopScan(BleScannerWorker* scanner)
+{
+#if defined(USE_SIMPLEBLE)
+    if (scanner.adapter_) {
+        try {
+            scanner->adapter_->set_callback_on_scan_found(nullptr); // 🔥 MOST IMPORTANT
+            scanner->adapter_->scan_stop();
+        } catch (...) {
+        }
+    }
+
+    emit scanner->scanStopped();
+#else
+    if (scanner->isActive())
+        scanner->adapterStopScan();
+#endif
+}
+
+bool BleScannerWorker::isActive()
+{
+    return adapter_->isActive();
+}
+void BleScannerWorker::adapterStopScan()
+{
+    adapter_->stop();
+}
+void BleScannerWorker::adapterStartScan()
+{
+    adapter_->start(QBluetoothDeviceDiscoveryAgent::LowEnergyMethod);
 }
 
 // ====================
@@ -120,7 +196,7 @@ static void _setScanCallback(BleScannerWorker* scanner)
                 );
         });
 #else
-    // TODO: impplement for QtBluetooth
+    // Fall through for QtBluetooth
 #endif
 }
 
@@ -135,24 +211,8 @@ static void _startScan(BleScannerWorker* scanner)
         emit scanner.scanStopped();
     }
 #else
-    // TODO: implement for QtBluetooth
-#endif
-}
-
-static void _stopScan(BleScannerWorker* scanner)
-{
-#if defined(USE_SIMPLEBLE)
-    if (scanner.adapter_) {
-        try {
-            scanner->adapter_->set_callback_on_scan_found(nullptr); // 🔥 MOST IMPORTANT
-            scanner->adapter_->scan_stop();
-        } catch (...) {
-        }
-    }
-
-    emit scanner->scanStopped();
-#else
-    // TODO: implement for QtBluetooth
+    scanner->adapterStartScan();
+    qDebug() << "Scan started";
 #endif
 }
 
