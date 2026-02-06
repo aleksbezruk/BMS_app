@@ -20,9 +20,25 @@ ApplicationWindow {
             currentIndex: tabBar.currentIndex
 
             Page {
+                Connections {
+                    target: bleManager
+                    function isBMSdevice(name) {
+                        if ((name === "QN9080_BMS") ||
+                            (name === "BMS_MCU"))
+                        {
+                            return true
+                        }
+                        return false
+                    }
+                    function onDeviceFound(address, name) {
+                        if (isBMSdevice(name)) {
+                            bmsDevices.append({ address: address, name: name })
+                        }
+                    }
+                }
                 ColumnLayout {
                     anchors.fill: parent
-                    spacing: 6
+                    spacing: 20
                     Label {
                         text: "Devices"
                         anchors.left: parent.left
@@ -31,11 +47,61 @@ ApplicationWindow {
                     }
                     Button {
                         text: "Scan BMS devices"
+                        spacing: 6
+                        anchors.margins: 12
                         onClicked: bleManager.startScan()
+                    }
+                    // BMS devices model
+                    ListModel {
+                        id: bmsDevices
+                    }
+
+                    // Scrollable list
+                    ListView {
+                        id: bmsList
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        model: bmsDevices
+                        clip: true
+                        spacing: 6
+
+                        ScrollBar.vertical: ScrollBar {
+                            policy: ScrollBar.AsNeeded
+                        }
+
+                        delegate: Rectangle {
+                            width: bmsList.width/3
+                            height: 56
+                            radius: 6
+                            color: index % 2 ? "#202020" : "#2a2a2a"
+
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 4
+
+                                Text {
+                                    text: name
+                                    color: "white"
+                                    font.bold: true
+                                    elide: Text.ElideRight
+                                }
+
+                                Text {
+                                    text: address
+                                    color: "#aaaaaa"
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                }
+                            }
+                        }
                     }
                     Button {
                         text: "Stop Scan"
-                        onClicked: bleManager.stopScan()
+                        onClicked: {
+                            bleManager.stopScan()
+                            bmsDevices.clear()
+                        }
                     }
                 }
             }
@@ -85,7 +151,7 @@ ApplicationWindow {
                     ListView {
                         id: bleList
                         Layout.fillWidth: true
-                        Layout.fillHeight: true   // 🔥 THIS IS CRITICAL
+                        Layout.fillHeight: true
                         model: bleDevicesModel
                         clip: true
                         spacing: 6
@@ -95,7 +161,7 @@ ApplicationWindow {
                         }
 
                         delegate: Rectangle {
-                            width: bleList.width
+                            width: bleList.width/3
                             height: 56
                             radius: 6
                             color: index % 2 ? "#202020" : "#2a2a2a"
