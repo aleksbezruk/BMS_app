@@ -43,14 +43,11 @@ signals:
                        QByteArray data);
 
 private slots:
-    // controller
     void onConnected();
     void onDisconnected();
     void onError(QLowEnergyController::Error);
-    void onServiceDiscovered(const QBluetoothUuid &uuid);
     void onServiceScanDone();
 
-    // service
     void onServiceStateChanged(QLowEnergyService::ServiceState s);
     void onCharacteristicChanged(const QLowEnergyCharacteristic &c,
                                  const QByteArray &value);
@@ -58,15 +55,13 @@ private slots:
                               const QByteArray &value);
     void onCharacteristicWritten(const QLowEnergyCharacteristic &c,
                                  const QByteArray &value);
-    void onDescriptorWritten(const QLowEnergyDescriptor &d,
-                             const QByteArray &value);
 
 private:
     struct WriteRequest {
-        QLowEnergyService *service = nullptr;
+        QLowEnergyService *service;
         QLowEnergyCharacteristic characteristic;
         QByteArray data;
-        bool withResponse = true;
+        bool withResponse;
     };
 
     void processWriteQueue();
@@ -75,10 +70,13 @@ private:
 private:
     QBluetoothDeviceInfo deviceInfo;
     QLowEnergyController *controller = nullptr;
+
     QHash<QBluetoothUuid, QLowEnergyService*> services;
+
+    QHash<QBluetoothUuid, QBluetoothUuid> charToService;
 
     QQueue<WriteRequest> writeQueue;
     bool writeInProgress = false;
 };
 
-#endif // BLECONNECTIONWORKER_H
+#endif
