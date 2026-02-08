@@ -44,6 +44,10 @@ qt_add_qml_module(BMS_app
         BLE/blemanager.h
         BLE/blescannerworker.cpp
         BLE/blescannerworker.h
+        BLE/BleConnection.h
+        BLE/BleConnectionWorker.h
+        BLE/BleConnection.cpp
+        BLE/BleConnectionWorker.cpp
 )
 
 # -------------------------

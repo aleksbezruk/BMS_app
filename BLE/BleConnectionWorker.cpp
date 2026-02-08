@@ -1,0 +1,219 @@
+#include "BleConnectionWorker.h"
+#include <QDebug>
+
+BleConnectionWorker::BleConnectionWorker(QObject *parent)
+    : QObject(parent)
+{
+}
+
+BleConnectionWorker::~BleConnectionWorker()
+{
+    if (controller)
+        controller->disconnectFromDevice();
+}
+
+void BleConnectionWorker::connectToDevice(const QBluetoothDeviceInfo &info)
+{
+    deviceInfo = info;
+
+    controller = QLowEnergyController::createCentral(deviceInfo, this);
+
+    connect(controller, &QLowEnergyController::connected,
+            this, &BleConnectionWorker::onConnected);
+
+    connect(controller, &QLowEnergyController::disconnected,
+            this, &BleConnectionWorker::onDisconnected);
+
+    connect(controller, &QLowEnergyController::errorOccurred,
+            this, &BleConnectionWorker::onError);
+
+    connect(controller, &QLowEnergyController::serviceDiscovered,
+            this, &BleConnectionWorker::onServiceDiscovered);
+
+    connect(controller, &QLowEnergyController::discoveryFinished,
+            this, &BleConnectionWorker::onServiceScanDone);
+
+    controller->connectToDevice();
+}
+
+void BleConnectionWorker::disconnectFromDevice()
+{
+    if (controller)
+        controller->disconnectFromDevice();
+}
+
+void BleConnectionWorker::onConnected()
+{
+    emit connected();
+    controller->discoverServices();
+}
+
+void BleConnectionWorker::onDisconnected()
+{
+    emit disconnected();
+
+    for (auto s : services)
+        s->deleteLater();
+
+    services.clear();
+}
+
+void BleConnectionWorker::onError(QLowEnergyController::Error e)
+{
+    emit error(QString("BLE error: %1").arg(e));
+}
+
+void BleConnectionWorker::onServiceDiscovered(const QBluetoothUuid &uuid)
+{
+    qDebug() << "Service:" << uuid;
+}
+
+void BleConnectionWorker::onServiceScanDone()
+{
+    for (auto uuid : controller->services()) {
+        auto service = controller->createServiceObject(uuid, this);
+        if (!service)
+            continue;
+
+        services.insert(uuid, service);
+
+        connect(service, &QLowEnergyService::stateChanged,
+                this, &BleConnectionWorker::onServiceStateChanged);
+
+        connect(service, &QLowEnergyService::characteristicChanged,
+                this, &BleConnectionWorker::onCharacteristicChanged);
+
+        connect(service, &QLowEnergyService::characteristicRead,
+                this, &BleConnectionWorker::onCharacteristicRead);
+
+        connect(service, &QLowEnergyService::characteristicWritten,
+                this, &BleConnectionWorker::onCharacteristicWritten);
+
+        connect(service, &QLowEnergyService::descriptorWritten,
+                this, &BleConnectionWorker::onDescriptorWritten);
+
+        service->discoverDetails();
+    }
+}
+
+void BleConnectionWorker::onServiceStateChanged(QLowEnergyService::ServiceState)
+{
+    bool allReady = true;
+
+    for (auto s : services)
+        if (s->state() != QLowEnergyService::ServiceDiscovered)
+            allReady = false;
+
+    if (allReady)
+        emit servicesReady();
+}
+
+QLowEnergyService* BleConnectionWorker::getService(const QBluetoothUuid &uuid) const
+{
+    return services.value(uuid, nullptr);
+}
+
+void BleConnectionWorker::read(const QBluetoothUuid &s,
+                               const QBluetoothUuid &c)
+{
+    auto srv = getService(s);
+    if (!srv)
+        return;
+
+    auto ch = srv->characteristic(c);
+    if (!ch.isValid())
+        return;
+
+    srv->readCharacteristic(ch);
+}
+
+void BleConnectionWorker::write(const QBluetoothUuid &s,
+                                const QBluetoothUuid &c,
+                                const QByteArray &data,
+                                bool resp)
+{
+    auto srv = getService(s);
+    if (!srv)
+        return;
+
+    auto ch = srv->characteristic(c);
+    if (!ch.isValid())
+        return;
+
+    WriteRequest r;
+    r.service = srv;
+    r.characteristic = ch;
+    r.data = data;
+    r.withResponse = resp;
+
+    writeQueue.enqueue(r);
+    processWriteQueue();
+}
+
+void BleConnectionWorker::processWriteQueue()
+{
+    if (writeInProgress || writeQueue.isEmpty())
+        return;
+
+    auto r = writeQueue.dequeue();
+    writeInProgress = true;
+
+    auto mode = r.withResponse ?
+                    QLowEnergyService::WriteWithResponse :
+                    QLowEnergyService::WriteWithoutResponse;
+
+    r.service->writeCharacteristic(r.characteristic, r.data, mode);
+
+    if (!r.withResponse) {
+        writeInProgress = false;
+        QMetaObject::invokeMethod(this,
+                                  &BleConnectionWorker::processWriteQueue,
+                                  Qt::QueuedConnection);
+    }
+}
+
+void BleConnectionWorker::enableNotifications(const QBluetoothUuid &s,
+                                              const QBluetoothUuid &c)
+{
+    auto srv = getService(s);
+    if (!srv)
+        return;
+
+    auto ch = srv->characteristic(c);
+    if (!ch.isValid())
+        return;
+
+    auto desc = ch.descriptor(
+        QBluetoothUuid::DescriptorType::ClientCharacteristicConfiguration);
+
+    if (desc.isValid())
+        srv->writeDescriptor(desc, QByteArray::fromHex("0100"));
+}
+
+void BleConnectionWorker::onCharacteristicChanged(const QLowEnergyCharacteristic &c,
+                                                  const QByteArray &value)
+{
+    emit notification(c.service()->serviceUuid(),
+                      c.uuid(),
+                      value);
+}
+
+void BleConnectionWorker::onCharacteristicRead(const QLowEnergyCharacteristic &c,
+                                               const QByteArray &value)
+{
+    emit readCompleted(c.service()->serviceUuid(),
+                       c.uuid(),
+                       value);
+}
+
+void BleConnectionWorker::onCharacteristicWritten(const QLowEnergyCharacteristic &,
+                                                  const QByteArray &)
+{
+    writeInProgress = false;
+    processWriteQueue();
+}
+
+void BleConnectionWorker::onDescriptorWritten(const QLowEnergyDescriptor &,
+                                              const QByteArray &)
+{
+}
