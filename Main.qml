@@ -21,22 +21,6 @@ ApplicationWindow {
 
             // Page with BMS devices
             Page {
-                Connections {
-                    target: bleManager
-                    function isBMSdevice(name) {
-                        if ((name === "QN9080_BMS") ||
-                            (name === "BMS_MCU"))
-                        {
-                            return true
-                        }
-                        return false
-                    }
-                    function onDeviceFound(address, name) {
-                        if (isBMSdevice(name)) {
-                            bmsDevices.append({ address: address, name: name })
-                        }
-                    }
-                }
                 contentItem: RowLayout {
                     // anchors.fill: parent
                     spacing: 0
@@ -45,7 +29,7 @@ ApplicationWindow {
                         // anchors.fill: parent
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.preferredWidth: parent.width * 0.4   // ← important (stretch factor)
+                        Layout.preferredWidth: parent.width * 0.2   // ← important (stretch factor)
                         spacing: 20
                         Label {
                             text: "Devices"
@@ -59,56 +43,74 @@ ApplicationWindow {
                             anchors.margins: 12
                             onClicked: bleManager.startScan()
                         }
-                        // BMS devices model
-                        ListModel {
-                            id: bmsDevices
-                        }
-
-                        // Scrollable list
-                        ListView {
-                            id: bmsList
-                            Layout.fillWidth: true
-                            Layout.fillHeight: true
-                            model: bmsDevices
-                            clip: true
-                            spacing: 6
-
-                            ScrollBar.vertical: ScrollBar {
-                                policy: ScrollBar.AsNeeded
-                            }
-
-                            delegate: Rectangle {
-                                width: bmsList.width/3
-                                height: 56
-                                radius: 6
-                                color: index % 2 ? "#202020" : "#2a2a2a"
-
-                                Column {
-                                    anchors.fill: parent
-                                    anchors.margins: 10
-                                    spacing: 4
-
-                                    Text {
-                                        text: name
-                                        color: "white"
-                                        font.bold: true
-                                        elide: Text.ElideRight
-                                    }
-
-                                    Text {
-                                        text: address
-                                        color: "#aaaaaa"
-                                        font.pixelSize: 12
-                                        elide: Text.ElideRight
-                                    }
-                                }
-                            }
-                        }
                         Button {
                             text: "Stop Scan"
                             onClicked: {
                                 bleManager.stopScan()
                                 bmsDevices.clear()
+                            }
+                        }
+                    }
+                    Connections {
+                        target: bleManager
+                        function isBMSdevice(name) {
+                            if ((name === "QN9080_BMS") ||
+                                (name === "BMS_MCU"))
+                            {
+                                return true
+                            }
+                            return false
+                        }
+                        function onDeviceFound(address, name) {
+                            if (isBMSdevice(name)) {
+                                bmsDevices.append({ address: address, name: name })
+                            }
+                        }
+                    }
+
+                    // BMS devices model
+                    ListModel {
+                        id: bmsDevices
+                    }
+
+                    // Scrollable list
+                    ListView {
+                        id: bmsList
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: parent.width * 0.2
+                        model: bmsDevices
+                        clip: true
+                        spacing: 6
+
+                        ScrollBar.vertical: ScrollBar {
+                            policy: ScrollBar.AsNeeded
+                        }
+
+                        delegate: Rectangle {
+                            width: bmsList.width/6
+                            height: 56
+                            radius: 6
+                            color: index % 2 ? "#202020" : "#2a2a2a"
+
+                            Column {
+                                anchors.fill: parent
+                                anchors.margins: 10
+                                spacing: 4
+
+                                Text {
+                                    text: name
+                                    color: "white"
+                                    font.bold: true
+                                    elide: Text.ElideRight
+                                }
+
+                                Text {
+                                    text: address
+                                    color: "#aaaaaa"
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                }
                             }
                         }
                     }
@@ -120,9 +122,10 @@ ApplicationWindow {
                         Layout.preferredWidth: 20    // optional
                     }
 
-                    // Connect BMD devices part
+                    // Connect BMS devices (right part)
                     ColumnLayout {
                         // anchors.fill: parent
+                        id: rightPanel
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         Layout.preferredWidth: parent.width * 0.55
@@ -134,10 +137,47 @@ ApplicationWindow {
                             anchors.margins: 12
                         }
                         Button {
-                            text: "Connect to BMS device"
-                            spacing: 6
-                            anchors.margins: 12
-                            //onClicked: bleManager.startScan()
+                            text: "Connect to device"
+                            onClicked: devicePopup.open()
+                        }
+                        Popup {
+                            id: devicePopup
+                            width: parent.width * 0.8
+                            height: parent.height * 0.7
+                            modal: true
+                            focus: true
+                            anchors.centerIn: parent
+
+                            Rectangle {
+                                anchors.fill: parent
+                                color: "#303030"
+                                radius: 8
+
+                                ListView {
+                                    anchors.fill: parent
+                                    model: bmsDevices   // 👈 SAME model
+
+                                    delegate: Rectangle {
+                                        width: parent.width
+                                        height: 60
+                                        color: "#444"
+
+                                        Text {
+                                            anchors.centerIn: parent
+                                            text: name + " (" + address + ")"
+                                            color: "white"
+                                        }
+
+                                        MouseArea {
+                                            anchors.fill: parent
+                                            onClicked: {
+                                                console.log("connect to", address)
+                                                devicePopup.close()
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
