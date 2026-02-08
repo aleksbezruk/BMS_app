@@ -19,6 +19,7 @@ ApplicationWindow {
             Layout.fillHeight: true
             currentIndex: tabBar.currentIndex
 
+            // Page with BMS devices
             Page {
                 Connections {
                     target: bleManager
@@ -36,76 +37,113 @@ ApplicationWindow {
                         }
                     }
                 }
-                ColumnLayout {
-                    anchors.fill: parent
-                    spacing: 20
-                    Label {
-                        text: "Devices"
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.margins: 12
-                    }
-                    Button {
-                        text: "Scan BMS devices"
-                        spacing: 6
-                        anchors.margins: 12
-                        onClicked: bleManager.startScan()
-                    }
-                    // BMS devices model
-                    ListModel {
-                        id: bmsDevices
-                    }
-
-                    // Scrollable list
-                    ListView {
-                        id: bmsList
+                contentItem: RowLayout {
+                    // anchors.fill: parent
+                    spacing: 0
+                    // Scanned BMS devices (Left panel)
+                    ColumnLayout {
+                        // anchors.fill: parent
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        model: bmsDevices
-                        clip: true
-                        spacing: 6
-
-                        ScrollBar.vertical: ScrollBar {
-                            policy: ScrollBar.AsNeeded
+                        Layout.preferredWidth: parent.width * 0.4   // ← important (stretch factor)
+                        spacing: 20
+                        Label {
+                            text: "Devices"
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.margins: 12
+                        }
+                        Button {
+                            text: "Scan BMS devices"
+                            spacing: 6
+                            anchors.margins: 12
+                            onClicked: bleManager.startScan()
+                        }
+                        // BMS devices model
+                        ListModel {
+                            id: bmsDevices
                         }
 
-                        delegate: Rectangle {
-                            width: bmsList.width/3
-                            height: 56
-                            radius: 6
-                            color: index % 2 ? "#202020" : "#2a2a2a"
+                        // Scrollable list
+                        ListView {
+                            id: bmsList
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            model: bmsDevices
+                            clip: true
+                            spacing: 6
 
-                            Column {
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                spacing: 4
+                            ScrollBar.vertical: ScrollBar {
+                                policy: ScrollBar.AsNeeded
+                            }
 
-                                Text {
-                                    text: name
-                                    color: "white"
-                                    font.bold: true
-                                    elide: Text.ElideRight
-                                }
+                            delegate: Rectangle {
+                                width: bmsList.width/3
+                                height: 56
+                                radius: 6
+                                color: index % 2 ? "#202020" : "#2a2a2a"
 
-                                Text {
-                                    text: address
-                                    color: "#aaaaaa"
-                                    font.pixelSize: 12
-                                    elide: Text.ElideRight
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: 10
+                                    spacing: 4
+
+                                    Text {
+                                        text: name
+                                        color: "white"
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        text: address
+                                        color: "#aaaaaa"
+                                        font.pixelSize: 12
+                                        elide: Text.ElideRight
+                                    }
                                 }
                             }
                         }
+                        Button {
+                            text: "Stop Scan"
+                            onClicked: {
+                                bleManager.stopScan()
+                                bmsDevices.clear()
+                            }
+                        }
                     }
-                    Button {
-                        text: "Stop Scan"
-                        onClicked: {
-                            bleManager.stopScan()
-                            bmsDevices.clear()
+
+                    // Visual Separator
+                    ToolSeparator {
+                        orientation: Qt.Vertical     // line top→bottom
+                        Layout.fillHeight: true     // stretch vertically
+                        Layout.preferredWidth: 20    // optional
+                    }
+
+                    // Connect BMD devices part
+                    ColumnLayout {
+                        // anchors.fill: parent
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: parent.width * 0.55
+                        spacing: 20
+                        Label {
+                            text: "Connect BMS devices"
+                            anchors.left: parent.left
+                            anchors.top: parent.top
+                            anchors.margins: 12
+                        }
+                        Button {
+                            text: "Connect to BMS device"
+                            spacing: 6
+                            anchors.margins: 12
+                            //onClicked: bleManager.startScan()
                         }
                     }
                 }
             }
 
+            // Page with debug information
             Page {
                 Connections {
                     target: bleManager
@@ -199,7 +237,7 @@ ApplicationWindow {
             currentIndex: pages.currentIndex
         }
 
-        // Tabs at the bottom
+        // Tabs at the bottom to switch Pages
         TabBar {
             id: tabBar
             Layout.alignment: Qt.AlignHCenter
