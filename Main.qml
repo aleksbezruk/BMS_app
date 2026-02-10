@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import BMS.BLE 1.0
+import BMS
 
 ApplicationWindow {
     width: Screen.width
@@ -178,27 +178,28 @@ ApplicationWindow {
 
                                                 devicePopup.close()
 
-                                                // destroy previous connection if exists
+                                                // ---- destroy previous connection safely ----
                                                 if (bleConnection) {
+                                                    console.log("Destroying previous BLE connection")
                                                     bleConnection.disconnectFromDevice()
                                                     bleConnection.destroy()
                                                     bleConnection = null
                                                 }
 
-                                                // create new connection object
-                                                bleConnection = Qt.createQmlObject(
-                                                    'import BMS.BLE 1.0; BleConnection {}',
-                                                    rightPanel
-                                                )
+                                                // ---- create new connection ----
+                                                bleConnection = Qt.createQmlObject(`
+                                                    import BMS
+                                                    BleConnection {}
+                                                `, rightPanel)
 
-                                                console.log("Creating BleConnection for", address)
+                                                console.log("Created BleConnection for", address)
 
-                                                // signals
-                                                bleConnection.connected.connect(function() {
+                                                // ---- connect signals ONCE ----
+                                                bleConnection.connected.connect(() => {
                                                     console.log("BLE connected to", address)
                                                 })
 
-                                                bleConnection.disconnected.connect(function() {
+                                                bleConnection.disconnected.connect(() => {
                                                     console.log("BLE disconnected")
 
                                                     if (bleConnection) {
@@ -207,11 +208,11 @@ ApplicationWindow {
                                                     }
                                                 })
 
-                                                bleConnection.error.connect(function(err) {
+                                                bleConnection.error.connect((err) => {
                                                     console.log("BLE error:", err)
                                                 })
 
-                                                // start connection
+                                                // ---- start connection ----
                                                 bleConnection.connectToDevice(address, name)
                                             }
                                         }

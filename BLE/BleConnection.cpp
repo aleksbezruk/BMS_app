@@ -73,7 +73,9 @@ void BleConnection::connectToDevice(QString address, QString name)
     QBluetoothAddress addr(address);
     QBluetoothDeviceInfo info(addr, name, 0);
 
-    QMetaObject::invokeMethod(worker,
+    info.setCoreConfigurations(QBluetoothDeviceInfo::LowEnergyCoreConfiguration);
+
+    QMetaObject::invokeMethod(m_worker,
                               "connectToDevice",
                               Qt::QueuedConnection,
                               Q_ARG(QBluetoothDeviceInfo, info));

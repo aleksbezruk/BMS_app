@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     // (like high-DPI scaling, parsing command line args).
     QGuiApplication app(argc, argv);
 
-    qmlRegisterType<BleConnection>("BMS.BLE", 1, 0, "BleConnection");
+    // qmlRegisterType<BleConnection>("BMS.BLE", 1, 0, "BleConnection");
 
     qRegisterMetaType<QBluetoothDeviceInfo>();
 

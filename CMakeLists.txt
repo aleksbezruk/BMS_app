@@ -50,6 +50,11 @@ qt_add_qml_module(BMS_app
         BLE/BleConnectionWorker.cpp
 )
 
+target_include_directories(BMS_app PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/BLE
+)
+
 # -------------------------
 # BACKEND
 # -------------------------
