@@ -1,39 +1,42 @@
-#ifndef BLECONNECTION_H
-#define BLECONNECTION_H
+#pragma once
 
 #include <QObject>
-#include <QtBluetooth>
 #include <QThread>
+#include <QtBluetooth>
 
 class BleConnectionWorker;
 
 class BleConnection : public QObject
 {
     Q_OBJECT
+
+    Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
+
 public:
     explicit BleConnection(QObject *parent = nullptr);
     ~BleConnection();
 
-    void start();
-    void stop();
+    bool isConnected() const { return m_connected; }
 
-    void connectToDevice(const QBluetoothDeviceInfo &info);
-    void disconnectFromDevice();
+    // ---- QML API ----
+    Q_INVOKABLE void connectToDevice(QString address, QString name);
+    Q_INVOKABLE void disconnectDevice();
 
-    void read(const QBluetoothUuid &service,
-              const QBluetoothUuid &characteristic);
+    Q_INVOKABLE void read(const QBluetoothUuid &service,
+                          const QBluetoothUuid &characteristic);
 
-    void write(const QBluetoothUuid &service,
-               const QBluetoothUuid &characteristic,
-               const QByteArray &data,
-               bool withResponse = true);
+    Q_INVOKABLE void write(const QBluetoothUuid &service,
+                           const QBluetoothUuid &characteristic,
+                           const QByteArray &data,
+                           bool withResponse = true);
 
-    void enableNotifications(const QBluetoothUuid &service,
-                             const QBluetoothUuid &characteristic);
+    Q_INVOKABLE void enableNotifications(const QBluetoothUuid &service,
+                                         const QBluetoothUuid &characteristic);
 
 signals:
     void connected();
     void disconnected();
+    void connectedChanged();
     void servicesReady();
     void error(QString);
 
@@ -46,8 +49,10 @@ signals:
                        QByteArray data);
 
 private:
-    QThread workerThread;
-    BleConnectionWorker *worker = nullptr;
-};
+    QThread m_thread;
+    BleConnectionWorker *m_worker = nullptr;
+    bool m_connected = false;
 
-#endif // BLECONNECTION_H
+    void setupWorker();
+    void teardown();
+};

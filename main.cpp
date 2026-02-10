@@ -9,6 +9,8 @@
 
 #include "BLE/blemanager.h"
 
+#include "BLE/BleConnection.h"
+
 #include <QPermissions>
 
 int main(int argc, char *argv[])
@@ -16,6 +18,10 @@ int main(int argc, char *argv[])
     // Initialize the application. This handles system-specific setup
     // (like high-DPI scaling, parsing command line args).
     QGuiApplication app(argc, argv);
+
+    qmlRegisterType<BleConnection>("BMS.BLE", 1, 0, "BleConnection");
+
+    qRegisterMetaType<QBluetoothDeviceInfo>();
 
 #ifdef Q_OS_ANDROID
     // Runtime permission
