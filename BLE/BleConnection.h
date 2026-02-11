@@ -12,9 +12,8 @@ class BleConnection : public QObject
 {
     Q_OBJECT
     QML_ELEMENT     // <-- THIS is enough
-    // QML_SINGLETON   // only if singleton (probably not)
 
-    Q_PROPERTY(bool connected READ isConnected NOTIFY connectedChanged)
+    Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectedChanged)
 
 public:
     explicit BleConnection(QObject *parent = nullptr);

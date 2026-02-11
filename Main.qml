@@ -162,7 +162,7 @@ ApplicationWindow {
                                     model: bmsDevices   // 👈 SAME model
 
                                     delegate: Rectangle {
-                                        width: parent.width
+                                        width: devicePopup.width
                                         height: 60
                                         color: "#444"
 
@@ -181,7 +181,7 @@ ApplicationWindow {
                                                 // ---- destroy previous connection safely ----
                                                 if (bleConnection) {
                                                     console.log("Destroying previous BLE connection")
-                                                    bleConnection.disconnectFromDevice()
+                                                    bleConnection.disconnectDevice()
                                                     bleConnection.destroy()
                                                     bleConnection = null
                                                 }
@@ -194,19 +194,13 @@ ApplicationWindow {
 
                                                 console.log("Created BleConnection for", address)
 
-                                                // ---- connect signals ONCE ----
-                                                bleConnection.connected.connect(() => {
-                                                    console.log("BLE connected to", address)
-                                                })
-
-                                                bleConnection.disconnected.connect(() => {
-                                                    console.log("BLE disconnected")
-
-                                                    if (bleConnection) {
-                                                        bleConnection.destroy()
-                                                        bleConnection = null
+                                                function onConnectedChanged() {
+                                                    if (bleConnection.isConnected) {
+                                                        console.log("BLE connected to", address)
+                                                    } else {
+                                                        console.log("BLE disconnected")
                                                     }
-                                                })
+                                                }
 
                                                 bleConnection.error.connect((err) => {
                                                     console.log("BLE error:", err)
