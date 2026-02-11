@@ -44,11 +44,13 @@ ApplicationWindow {
                             text: "Scan BMS devices"
                             spacing: 20
                             anchors.margins: 12
+                            width: parent.width * 0.2
                             onClicked: bleManager.startScan()
                         }
                         Button {
                             text: "Stop Scan"
                             spacing: 20
+                            width: parent.width * 0.2
                             onClicked: {
                                 bleManager.stopScan()
                                 bmsDevices.clear()
@@ -142,7 +144,21 @@ ApplicationWindow {
                         }
                         Button {
                             text: "Connect to device"
+                            width: parent.width * 0.2
                             onClicked: devicePopup.open()
+                        }
+                        Row {
+                            spacing: 8
+                            Image {
+                                source: "images/battery.png"
+                                width: 122
+                                height: 122
+                                visible: bleConnection?.isConnected ? true: false
+                            }
+                            Text {
+                                text: bleConnection?.isConnected ? "BMS connected" : "Disconnected"
+                                color: "magenta"
+                            }
                         }
                         Connections {
                             target: bleConnection
@@ -239,7 +255,7 @@ ApplicationWindow {
                             Label {
                                 anchors.centerIn: parent
                                 text: toast.message
-                                color: "white"
+                                color: "magenta"
                             }
 
                             property string message: ""
@@ -252,7 +268,7 @@ ApplicationWindow {
 
                             Timer {
                                 id: timer
-                                interval: 2000
+                                interval: 4000
                                 onTriggered: toast.close()
                             }
                         }
@@ -272,8 +288,24 @@ ApplicationWindow {
                         return false
                     }
                     function onDeviceFound(address, name) {
-                        if (!deviceExists(address)) {
+                        if (!deviceExists(address) &&
+                            ((name === "QN9080_BMS") ||
+                            (name === "BMS_MCU"))) {
                             bleDevicesModel.append({ address: address, name: name })
+                        }
+                    }
+                }
+                Connections {
+                    target: bleConnection
+                    ignoreUnknownSignals: true
+
+                    function onConnectedChanged() {
+                        if (!bleConnection)
+                            return
+                        if (bleConnection.isConnected) {
+                            bleDevicesModel.append({ address: "", name: "BMS connected" })
+                        } else {
+                            bleDevicesModel.append({ address: "", name: "BMS disconnected" })
                         }
                     }
                 }
