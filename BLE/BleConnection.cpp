@@ -23,12 +23,14 @@ void BleConnection::setupWorker()
     // ---- worker → UI signals ----
     connect(m_worker, &BleConnectionWorker::connected, this, [this] {
         m_connected = true;
+        qDebug() << "C++: connected signal received";
         emit connectedChanged();
         emit connected();
     });
 
     connect(m_worker, &BleConnectionWorker::disconnected, this, [this] {
         m_connected = false;
+        qDebug() << "C++: disconnected signal received";
         emit connectedChanged();
         emit disconnected();
 

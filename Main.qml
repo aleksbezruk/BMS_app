@@ -26,7 +26,6 @@ ApplicationWindow {
             // Page with BMS devices
             Page {
                 contentItem: RowLayout {
-                    // anchors.fill: parent
                     spacing: 0
                     // Scanned BMS devices (Left panel)
                     ColumnLayout {
@@ -43,12 +42,13 @@ ApplicationWindow {
                         }
                         Button {
                             text: "Scan BMS devices"
-                            spacing: 6
+                            spacing: 20
                             anchors.margins: 12
                             onClicked: bleManager.startScan()
                         }
                         Button {
                             text: "Stop Scan"
+                            spacing: 20
                             onClicked: {
                                 bleManager.stopScan()
                                 bmsDevices.clear()
@@ -82,7 +82,7 @@ ApplicationWindow {
                         id: bmsList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.preferredWidth: parent.width * 0.2
+                        Layout.preferredWidth: parent.width * 0.3
                         model: bmsDevices
                         clip: true
                         spacing: 6
@@ -92,7 +92,7 @@ ApplicationWindow {
                         }
 
                         delegate: Rectangle {
-                            width: bmsList.width/6
+                            width: bmsList.width
                             height: 56
                             radius: 6
                             color: index % 2 ? "#202020" : "#2a2a2a"
@@ -144,6 +144,23 @@ ApplicationWindow {
                             text: "Connect to device"
                             onClicked: devicePopup.open()
                         }
+                        Connections {
+                            target: bleConnection
+                            ignoreUnknownSignals: true
+
+                            function onConnectedChanged() {
+                                if (!bleConnection)
+                                    return
+
+                                if (bleConnection.isConnected) {
+                                    console.log("BLE connected")
+                                    toast.show("BMS connected")
+                                } else {
+                                    console.log("BLE disconnected")
+                                    toast.show("BMS disconnected")
+                                }
+                            }
+                        }
                         Popup {
                             id: devicePopup
                             width: parent.width * 0.8
@@ -194,14 +211,6 @@ ApplicationWindow {
 
                                                 console.log("Created BleConnection for", address)
 
-                                                function onConnectedChanged() {
-                                                    if (bleConnection.isConnected) {
-                                                        console.log("BLE connected to", address)
-                                                    } else {
-                                                        console.log("BLE disconnected")
-                                                    }
-                                                }
-
                                                 bleConnection.error.connect((err) => {
                                                     console.log("BLE error:", err)
                                                 })
@@ -212,6 +221,39 @@ ApplicationWindow {
                                         }
                                     }
                                 }
+                            }
+                        }
+                        Popup {
+                            id: toast
+                            x: parent.width/2 - width/2
+                            y: parent.height - 80
+                            width: 300
+                            height: 50
+                            modal: false
+                            focus: false
+                            background: Rectangle {
+                                color: "#333"
+                                radius: 6
+                            }
+
+                            Label {
+                                anchors.centerIn: parent
+                                text: toast.message
+                                color: "white"
+                            }
+
+                            property string message: ""
+
+                            function show(msg) {
+                                message = msg
+                                open()
+                                timer.restart()
+                            }
+
+                            Timer {
+                                id: timer
+                                interval: 2000
+                                onTriggered: toast.close()
                             }
                         }
                     }
