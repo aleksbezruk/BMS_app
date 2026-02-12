@@ -25,48 +25,57 @@ ApplicationWindow {
 
             // Page with BMS devices
             Page {
-                contentItem: RowLayout {
-                    spacing: 0
-                    // Scanned BMS devices (Left panel)
+                id: mainPage
+                property bool portrait: width < height
+
+                contentItem: GridLayout {
+                    anchors.fill: parent
+                    rowSpacing: 0
+                    columnSpacing: 0
+
+                    flow: mainPage.portrait ? GridLayout.TopToBottom : GridLayout.LeftToRight
+                    columns: mainPage.portrait ? 1 : 4
+                    rows: mainPage.portrait ? 4 : 1
+
+                    // ================= LEFT PANEL =================
                     ColumnLayout {
-                        // anchors.fill: parent
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.preferredWidth: parent.width * 0.2   // ← important (stretch factor)
+                        Layout.preferredWidth: mainPage.portrait ? parent.width : parent.width * 0.2
+                        Layout.preferredHeight: mainPage.portrait ? parent.height * 0.25 : parent.height
                         spacing: 20
+
                         Label {
                             text: "Devices"
                             anchors.left: parent.left
                             anchors.top: parent.top
                             anchors.margins: 12
                         }
+
                         Button {
                             text: "Scan BMS devices"
-                            spacing: 20
-                            anchors.margins: 12
-                            width: parent.width * 0.2
+                            width: 160
                             onClicked: bleManager.startScan()
                         }
+
                         Button {
                             text: "Stop Scan"
-                            spacing: 20
-                            width: parent.width * 0.2
+                            width: 160
                             onClicked: {
                                 bleManager.stopScan()
                                 bmsDevices.clear()
                             }
                         }
                     }
+
+                    // BLE scan callbacks
                     Connections {
                         target: bleManager
+
                         function isBMSdevice(name) {
-                            if ((name === "QN9080_BMS") ||
-                                (name === "BMS_MCU"))
-                            {
-                                return true
-                            }
-                            return false
+                            return (name === "QN9080_BMS" || name === "BMS_MCU")
                         }
+
                         function onDeviceFound(address, name) {
                             if (isBMSdevice(name)) {
                                 bmsDevices.append({ address: address, name: name })
@@ -74,24 +83,21 @@ ApplicationWindow {
                         }
                     }
 
-                    // BMS devices model
-                    ListModel {
-                        id: bmsDevices
-                    }
+                    // ================= MODEL =================
+                    ListModel { id: bmsDevices }
 
-                    // Scrollable list
+                    // ================= LIST =================
                     ListView {
                         id: bmsList
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.preferredWidth: parent.width * 0.3
+                        Layout.preferredWidth: mainPage.portrait ? parent.width : parent.width * 0.3
+                        Layout.preferredHeight: mainPage.portrait ? parent.height * 0.35 : parent.height
                         model: bmsDevices
                         clip: true
                         spacing: 6
 
-                        ScrollBar.vertical: ScrollBar {
-                            policy: ScrollBar.AsNeeded
-                        }
+                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
 
                         delegate: Rectangle {
                             width: bmsList.width
@@ -121,45 +127,52 @@ ApplicationWindow {
                         }
                     }
 
-                    // Visual Separator
+                    // ================= SEPARATOR =================
                     ToolSeparator {
-                        orientation: Qt.Vertical     // line top→bottom
-                        Layout.fillHeight: true     // stretch vertically
-                        Layout.preferredWidth: 20    // optional
+                        orientation: mainPage.portrait ? Qt.Horizontal : Qt.Vertical
+                        Layout.fillWidth: mainPage.portrait
+                        Layout.fillHeight: !mainPage.portrait
                     }
 
-                    // Connect BMS devices (right part)
+                    // ================= RIGHT PANEL =================
                     ColumnLayout {
-                        // anchors.fill: parent
                         id: rightPanel
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        Layout.preferredWidth: parent.width * 0.55
+                        Layout.preferredWidth: mainPage.portrait ? parent.width : parent.width * 0.55
+                        Layout.preferredHeight: mainPage.portrait ? parent.height * 0.4 : parent.height
                         spacing: 20
+
                         Label {
                             text: "Connect BMS devices"
                             anchors.left: parent.left
                             anchors.top: parent.top
                             anchors.margins: 12
                         }
+
                         Button {
                             text: "Connect to device"
-                            width: parent.width * 0.2
+                            width: 180
                             onClicked: devicePopup.open()
                         }
+
                         Row {
                             spacing: 8
+
                             Image {
                                 source: "images/battery.png"
-                                width: 122
-                                height: 122
-                                visible: bleConnection?.isConnected ? true: false
+                                width: 64
+                                height: 64
+                                visible: bleConnection?.isConnected ?? false
                             }
+
                             Text {
                                 text: bleConnection?.isConnected ? "BMS connected" : "Disconnected"
                                 color: "magenta"
                             }
                         }
+
+                        // BLE connection callbacks
                         Connections {
                             target: bleConnection
                             ignoreUnknownSignals: true
@@ -177,6 +190,8 @@ ApplicationWindow {
                                 }
                             }
                         }
+
+                        // ================= DEVICE POPUP =================
                         Popup {
                             id: devicePopup
                             width: parent.width * 0.8
@@ -192,7 +207,7 @@ ApplicationWindow {
 
                                 ListView {
                                     anchors.fill: parent
-                                    model: bmsDevices   // 👈 SAME model
+                                    model: bmsDevices
 
                                     delegate: Rectangle {
                                         width: devicePopup.width
@@ -211,7 +226,6 @@ ApplicationWindow {
 
                                                 devicePopup.close()
 
-                                                // ---- destroy previous connection safely ----
                                                 if (bleConnection) {
                                                     console.log("Destroying previous BLE connection")
                                                     bleConnection.disconnectDevice()
@@ -219,7 +233,6 @@ ApplicationWindow {
                                                     bleConnection = null
                                                 }
 
-                                                // ---- create new connection ----
                                                 bleConnection = Qt.createQmlObject(`
                                                     import BMS
                                                     BleConnection {}
@@ -231,7 +244,6 @@ ApplicationWindow {
                                                     console.log("BLE error:", err)
                                                 })
 
-                                                // ---- start connection ----
                                                 bleConnection.connectToDevice(address, name)
                                             }
                                         }
@@ -239,6 +251,8 @@ ApplicationWindow {
                                 }
                             }
                         }
+
+                        // ================= TOAST =================
                         Popup {
                             id: toast
                             x: parent.width/2 - width/2
@@ -247,6 +261,7 @@ ApplicationWindow {
                             height: 50
                             modal: false
                             focus: false
+
                             background: Rectangle {
                                 color: "#333"
                                 radius: 6
