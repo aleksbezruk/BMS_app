@@ -2,8 +2,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-import BMS
-
 ApplicationWindow {
     width: Screen.width
     height: Screen.height
@@ -45,83 +43,82 @@ ApplicationWindow {
                         Layout.preferredHeight: mainPage.portrait ? parent.height * 0.25 : parent.height
                         spacing: 20
 
-                        Label {
-                            text: "Devices"
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                            anchors.margins: 12
-                        }
-
-                        Button {
-                            text: "Scan BMS devices"
-                            width: 160
-                            onClicked: bleManager.startScan()
-                        }
-
-                        Button {
-                            text: "Stop Scan"
-                            width: 160
-                            onClicked: {
-                                bleManager.stopScan()
-                                bmsDevices.clear()
+                        RowLayout {
+                            Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                            Button {
+                                text: "Find BMS"
+                                width: 100
+                                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                Layout.margins: 8
+                                onClicked: bleManager.startScan()
                             }
-                        }
-                    }
-
-                    // BLE scan callbacks
-                    Connections {
-                        target: bleManager
-
-                        function isBMSdevice(name) {
-                            return (name === "QN9080_BMS" || name === "BMS_MCU")
-                        }
-
-                        function onDeviceFound(address, name) {
-                            if (isBMSdevice(name)) {
-                                bmsDevices.append({ address: address, name: name })
-                            }
-                        }
-                    }
-
-                    // ================= MODEL =================
-                    ListModel { id: bmsDevices }
-
-                    // ================= LIST =================
-                    ListView {
-                        id: bmsList
-                        Layout.fillWidth: true
-                        Layout.fillHeight: true
-                        Layout.preferredWidth: mainPage.portrait ? parent.width : parent.width * 0.3
-                        Layout.preferredHeight: mainPage.portrait ? parent.height * 0.35 : parent.height
-                        model: bmsDevices
-                        clip: true
-                        spacing: 6
-
-                        ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
-
-                        delegate: Rectangle {
-                            width: bmsList.width
-                            height: 56
-                            radius: 6
-                            color: index % 2 ? "#202020" : "#2a2a2a"
-
-                            Column {
-                                anchors.fill: parent
-                                anchors.margins: 10
-                                spacing: 4
-
-                                Text {
-                                    text: name
-                                    color: "white"
-                                    font.bold: true
-                                    elide: Text.ElideRight
+                            Button {
+                                text: "Stop Scan"
+                                width: 120
+                                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
+                                Layout.margins: 8
+                                onClicked: {
+                                    bleManager.stopScan()
+                                    bmsDevices.clear()
                                 }
+                            }
+                        }
 
-                                Text {
-                                    text: address
-                                    color: "#aaaaaa"
-                                    font.pixelSize: 12
-                                    elide: Text.ElideRight
+                        // BLE scan callbacks
+                        Connections {
+                            target: bleManager
+
+                            function isBMSdevice(name) {
+                                return (name === "QN9080_BMS" || name === "BMS_MCU")
+                            }
+
+                            function onDeviceFound(address, name) {
+                                if (isBMSdevice(name)) {
+                                    bmsDevices.append({ address: address, name: name })
+                                }
+                            }
+                        }
+
+                        // ================= MODEL =================
+                        ListModel { id: bmsDevices }
+
+                        // ================= LIST =================
+                        ListView {
+                            id: bmsList
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: mainPage.portrait ? parent.width : parent.width * 0.3
+                            Layout.preferredHeight: mainPage.portrait ? parent.height * 0.35 : parent.height
+                            model: bmsDevices
+                            clip: true
+                            spacing: 6
+
+                            ScrollBar.vertical: ScrollBar { policy: ScrollBar.AsNeeded }
+
+                            delegate: Rectangle {
+                                width: bmsList.width
+                                height: 56
+                                radius: 6
+                                color: index % 2 ? "#202020" : "#2a2a2a"
+
+                                Column {
+                                    anchors.fill: parent
+                                    anchors.margins: 10
+                                    spacing: 4
+
+                                    Text {
+                                        text: name
+                                        color: "white"
+                                        font.bold: true
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        text: address
+                                        color: "#aaaaaa"
+                                        font.pixelSize: 12
+                                        elide: Text.ElideRight
+                                    }
                                 }
                             }
                         }
@@ -142,33 +139,30 @@ ApplicationWindow {
                         Layout.preferredWidth: mainPage.portrait ? parent.width : parent.width * 0.55
                         Layout.preferredHeight: mainPage.portrait ? parent.height * 0.4 : parent.height
                         spacing: 20
+                        Layout.alignment: Qt.AlignTop
 
-                        Label {
-                            text: "Connect BMS devices"
-                            anchors.left: parent.left
-                            anchors.top: parent.top
-                            anchors.margins: 12
-                        }
-
-                        Button {
-                            text: "Connect to device"
-                            width: 180
-                            onClicked: devicePopup.open()
-                        }
-
-                        Row {
-                            spacing: 8
-
-                            Image {
-                                source: "images/battery.png"
-                                width: 64
-                                height: 64
-                                visible: bleConnection?.isConnected ?? false
+                        RowLayout {
+                            Layout.alignment: Qt.AlignTop
+                            Button {
+                                text: "Connect to device"
+                                width: 180
+                                Layout.alignment: Qt.AlignTop
+                                onClicked: devicePopup.open()
                             }
 
-                            Text {
-                                text: bleConnection?.isConnected ? "BMS connected" : "Disconnected"
-                                color: "magenta"
+                            Row {
+                                Layout.alignment: Qt.AlignTop
+                                Image {
+                                    source: "images/battery.png"
+                                    width: 64
+                                    height: 64
+                                    visible: bleConnection?.isConnected ?? false
+                                }
+
+                                Text {
+                                    text: bleConnection?.isConnected ? "BMS connected" : "Disconnected"
+                                    color: "magenta"
+                                }
                             }
                         }
 
