@@ -35,7 +35,7 @@ signals:
     void scanningChanged();
     // Emitted when the worker finds a device.
     // In QML: `Connections { target: bleManager; function onDeviceFound(address, name) { ... } }`
-    void deviceFound(QString address, QString name);
+    void deviceFound(QString address, QString name, int batLvl);
 
 
     // INTERNAL SIGNAL (Missing but needed!)

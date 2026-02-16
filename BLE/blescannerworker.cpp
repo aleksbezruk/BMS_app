@@ -66,7 +66,7 @@ void BleScannerWorker::stopScan()
 {
     if (!scanning_) return;
 
-    scanning_ = false;      // 🔒 FIRST
+    scanning_ = false;
     stopRequested_ = true;
     emit scanStopped();
 
@@ -89,21 +89,46 @@ void BleScannerWorker::onStopped()
 
 void BleScannerWorker::deviceDiscovered(const QBluetoothDeviceInfo &info)
 {
-    if (!(info.coreConfigurations()
-          & QBluetoothDeviceInfo::LowEnergyCoreConfiguration))
-    {
+    if (!(info.coreConfigurations() & QBluetoothDeviceInfo::LowEnergyCoreConfiguration))
         return;
-    }
 
-    QString name = info.name().isEmpty()
-                       ? "Unknown"
-                       : info.name();
+    QString name = info.name().isEmpty() ? "Unknown" : info.name();
     QString addr = info.address().toString();
 
-    emit this->deviceFound(
-        addr,
-        name
-    );
+    static const QBluetoothUuid batteryUuid(quint16(0x180F));
+
+    // --- UUID list ---
+    QList<QBluetoothUuid> uuids = info.serviceUuids();
+
+    bool hasBatteryService = false;
+    for (const auto &uuid : uuids) {
+        if (uuid == batteryUuid)
+            hasBatteryService = true;
+    }
+
+    // --- Service data ---
+    int batteryLevel = -1;
+
+    auto serviceDataMap = info.serviceData();
+
+    for (auto it = serviceDataMap.begin(); it != serviceDataMap.end(); ++it)
+    {
+        QBluetoothUuid uuid = it.key();
+        QByteArray data = it.value();
+
+        if (uuid == batteryUuid)
+        {
+            if (!data.isEmpty())
+                batteryLevel = static_cast<uint8_t>(data.at(0));
+        }
+    }
+
+    qDebug() << "Found:" << name
+             << addr
+             << "battery =" << batteryLevel
+             << "has BAS =" << hasBatteryService;
+
+    emit deviceFound(addr, name, batteryLevel);
 }
 
 void BleScannerWorker::scanFinished()

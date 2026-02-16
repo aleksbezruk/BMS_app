@@ -72,9 +72,9 @@ ApplicationWindow {
                                 return (name === "QN9080_BMS" || name === "BMS_MCU")
                             }
 
-                            function onDeviceFound(address, name) {
+                            function onDeviceFound(address, name, vbatLvl) {
                                 if (isBMSdevice(name)) {
-                                    bmsDevices.append({ address: address, name: name })
+                                    bmsDevices.append({ address: address, name: name, vbat: vbatLvl })
                                 }
                             }
                         }
@@ -116,6 +116,13 @@ ApplicationWindow {
                                     Text {
                                         text: address
                                         color: "#aaaaaa"
+                                        font.pixelSize: 12
+                                        elide: Text.ElideRight
+                                    }
+
+                                    Text {
+                                        text: vbat + "%"
+                                        color: "green"
                                         font.pixelSize: 12
                                         elide: Text.ElideRight
                                     }
@@ -296,11 +303,11 @@ ApplicationWindow {
                         }
                         return false
                     }
-                    function onDeviceFound(address, name) {
+                    function onDeviceFound(address, name, batLvl) {
                         if (!deviceExists(address) &&
                             ((name === "QN9080_BMS") ||
                             (name === "BMS_MCU"))) {
-                            bleDevicesModel.append({ address: address, name: name })
+                            bleDevicesModel.append({ address: address, name: name, vbat: batLvl })
                         }
                     }
                 }
@@ -377,6 +384,13 @@ ApplicationWindow {
                                 Text {
                                     text: address
                                     color: "#aaaaaa"
+                                    font.pixelSize: 12
+                                    elide: Text.ElideRight
+                                }
+
+                                Text {
+                                    text: vbat + "%"
+                                    color: "green"
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
                                 }

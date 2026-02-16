@@ -31,7 +31,7 @@ public slots:
     void onStopped();
 
 signals:
-    void deviceFound(QString address, QString name);
+    void deviceFound(QString address, QString name, int batLvl);
     void scanStarted();
     void scanStopped();
 
@@ -41,7 +41,7 @@ private:
 #else
     QBluetoothDeviceDiscoveryAgent* adapter_;
 #endif
-    bool adapterInitialized_ = false; // Fixes: 'Use of undeclared identifier'
+    bool adapterInitialized_ = false;
     std::atomic<bool> stopRequested_{false};
     std::atomic<bool> scanning_{false};
 };
