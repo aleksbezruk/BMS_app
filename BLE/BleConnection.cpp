@@ -77,6 +77,10 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
             updateBattery(static_cast<quint8>(data[0]));
             break;
         }
+        case 0x9AE2:
+        {
+            qDebug() << "[AIOS], " << "SW state: " << static_cast<quint8>(data[0]);
+        }
         default:
         {
             break;
@@ -110,7 +114,14 @@ void BleConnection::disconnectDevice()
 
 void BleConnection::readChar(unsigned int uuid)
 {
-    QBluetoothUuid ch = QBluetoothUuid(quint16(uuid));
+    QBluetoothUuid ch;
+    if (uuid == 0x9AE2) {
+        // 128-bit UUIDs
+        ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeea}");
+    } else {
+        // 16-bit UUIDs
+        ch = QBluetoothUuid(quint16(uuid));
+    }
     qDebug() << "[read] " << "char: " << ch;
 
     read(ch);

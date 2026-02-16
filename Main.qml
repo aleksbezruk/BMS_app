@@ -150,13 +150,6 @@ ApplicationWindow {
 
                         RowLayout {
                             Layout.alignment: Qt.AlignTop
-                            Button {
-                                text: "Connect to device"
-                                width: 180
-                                Layout.alignment: Qt.AlignTop
-                                onClicked: devicePopup.open()
-                            }
-
                             Row {
                                 Layout.alignment: Qt.AlignTop
                                 Image {
@@ -177,6 +170,12 @@ ApplicationWindow {
                         RowLayout {
                             Layout.alignment: Qt.AlignTop
                             Button {
+                                text: "Connect to device"
+                                width: 180
+                                Layout.alignment: Qt.AlignTop
+                                onClicked: devicePopup.open()
+                            }
+                            Button {
                                 text: "Disconnect"
                                 width: 180
                                 Layout.alignment: Qt.AlignTop
@@ -188,6 +187,13 @@ ApplicationWindow {
                                 width: 180
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: bleConnection.readChar(0x2A19)
+                            }
+                            Button {
+                                visible: bleConnection?.isConnected ? true: false
+                                text: "Read switches"
+                                width: 180
+                                Layout.alignment: Qt.AlignTop
+                                onClicked: bleConnection.readChar(0x9AE2)
                             }
                         }
 
