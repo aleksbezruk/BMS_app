@@ -17,8 +17,7 @@ public slots:
     void connectToDevice(const QBluetoothDeviceInfo &info);
     void disconnectFromDevice();
 
-    void read(const QBluetoothUuid &service,
-              const QBluetoothUuid &characteristic);
+    void read(const QBluetoothUuid &characteristic);
 
     void write(const QBluetoothUuid &service,
                const QBluetoothUuid &characteristic,

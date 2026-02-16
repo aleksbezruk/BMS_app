@@ -43,6 +43,8 @@ void BleConnectionWorker::onConnected()
 {
     emit connected();
     controller->discoverServices();
+
+    qDebug() << "Start discovery of services";
 }
 
 void BleConnectionWorker::onDisconnected()
@@ -69,6 +71,7 @@ void BleConnectionWorker::onServiceScanDone()
         if (!service)
             continue;
 
+        qDebug() << "service uuid: " << uuid.toString();
         services.insert(uuid, service);
 
         connect(service, &QLowEnergyService::stateChanged,
@@ -102,8 +105,11 @@ void BleConnectionWorker::onServiceStateChanged(QLowEnergyService::ServiceState)
     for (auto serviceUuid : services.keys()) {
         auto service = services.value(serviceUuid);
 
-        for (auto c : service->characteristics())
+        for (auto c : service->characteristics()) {
+            qDebug() << "[on_svc_chngd] " << "svc: " << serviceUuid << " char: " << c.uuid();
             charToService.insert(c.uuid(), serviceUuid);
+        }
+
     }
 
     emit servicesReady();
@@ -114,16 +120,21 @@ QLowEnergyService* BleConnectionWorker::getService(const QBluetoothUuid &uuid) c
     return services.value(uuid, nullptr);
 }
 
-void BleConnectionWorker::read(const QBluetoothUuid &s,
-                               const QBluetoothUuid &c)
+void BleConnectionWorker::read(const QBluetoothUuid &c)
 {
+    QBluetoothUuid s = charToService.value(c);
+
     auto srv = getService(s);
-    if (!srv)
+    if (!srv) {
+        qDebug() << "[read_char]: not valid svc";
         return;
+    }
 
     auto ch = srv->characteristic(c);
-    if (!ch.isValid())
+    if (!ch.isValid()) {
+        qDebug() << "[read_char]: not valid char";
         return;
+    }
 
     srv->readCharacteristic(ch);
 }
@@ -196,6 +207,9 @@ void BleConnectionWorker::onCharacteristicRead(const QLowEnergyCharacteristic &c
                                                const QByteArray &value)
 {
     auto serviceUuid = charToService.value(c.uuid());
+
+    qDebug() << "[on char_read]" << "char: " << c.uuid() << "val = " << static_cast<quint8>(value[0]);
+
     emit readCompleted(serviceUuid, c.uuid(), value);
 }
 

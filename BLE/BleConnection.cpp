@@ -48,7 +48,7 @@ void BleConnection::setupWorker()
             this, &BleConnection::notification);
 
     connect(m_worker, &BleConnectionWorker::readCompleted,
-            this, &BleConnection::readCompleted);
+            this, &BleConnection::on_readCompleted);
 
     m_thread.start();
 }
@@ -64,6 +64,24 @@ void BleConnection::teardown()
 
     m_thread.quit();
     m_thread.wait();
+}
+
+void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteArray data)
+{
+    (void) s;
+
+    quint16 uuid = c.toUInt16();
+    switch (uuid) {
+        case 0x2A19:
+        {
+            updateBattery(static_cast<quint8>(data[0]));
+            break;
+        }
+        default:
+        {
+            break;
+        }
+    }
 }
 
 //
@@ -90,13 +108,19 @@ void BleConnection::disconnectDevice()
                               Qt::QueuedConnection);
 }
 
-void BleConnection::read(const QBluetoothUuid &s,
-                         const QBluetoothUuid &c)
+void BleConnection::readChar(unsigned int uuid)
+{
+    QBluetoothUuid ch = QBluetoothUuid(quint16(uuid));
+    qDebug() << "[read] " << "char: " << ch;
+
+    read(ch);
+}
+
+void BleConnection::read(const QBluetoothUuid &c)
 {
     QMetaObject::invokeMethod(m_worker,
                               "read",
                               Qt::QueuedConnection,
-                              Q_ARG(QBluetoothUuid, s),
                               Q_ARG(QBluetoothUuid, c));
 }
 
@@ -122,4 +146,9 @@ void BleConnection::enableNotifications(const QBluetoothUuid &s,
                               Qt::QueuedConnection,
                               Q_ARG(QBluetoothUuid, s),
                               Q_ARG(QBluetoothUuid, c));
+}
+
+int BleConnection::batteryLevel() const
+{
+    return m_batteryLevel;
 }

@@ -156,12 +156,6 @@ ApplicationWindow {
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: devicePopup.open()
                             }
-                            Button {
-                                text: "Disconnect"
-                                width: 180
-                                Layout.alignment: Qt.AlignTop
-                                onClicked: bleConnection.disconnectDevice()
-                            }
 
                             Row {
                                 Layout.alignment: Qt.AlignTop
@@ -171,11 +165,29 @@ ApplicationWindow {
                                     height: 64
                                     visible: bleConnection?.isConnected ?? false
                                 }
-
                                 Text {
-                                    text: bleConnection?.isConnected ? "BMS connected" : "Disconnected"
-                                    color: "magenta"
+                                    visible: bleConnection?.isConnected ? true : false
+                                    color: "green"
+                                    text: "Battery: " + bleConnection.batteryLevel + "%"
                                 }
+                            }
+                        }
+
+                        // Read VBAT
+                        RowLayout {
+                            Layout.alignment: Qt.AlignTop
+                            Button {
+                                text: "Disconnect"
+                                width: 180
+                                Layout.alignment: Qt.AlignTop
+                                onClicked: bleConnection.disconnectDevice()
+                            }
+                            Button {
+                                visible: bleConnection?.isConnected ? true: false
+                                text: "Read BAT"
+                                width: 180
+                                Layout.alignment: Qt.AlignTop
+                                onClicked: bleConnection.readChar(0x2A19)
                             }
                         }
 
@@ -277,7 +289,7 @@ ApplicationWindow {
                             Label {
                                 anchors.centerIn: parent
                                 text: toast.message
-                                color: "magenta"
+                                color: "blue"
                             }
 
                             property string message: ""

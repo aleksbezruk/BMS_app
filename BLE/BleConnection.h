@@ -11,9 +11,11 @@ class BleConnectionWorker;
 class BleConnection : public QObject
 {
     Q_OBJECT
-    QML_ELEMENT     // <-- THIS is enough
+    QML_ELEMENT
 
     Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectedChanged)
+
+    Q_PROPERTY(int batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
 
 public:
     explicit BleConnection(QObject *parent = nullptr);
@@ -25,8 +27,7 @@ public:
     Q_INVOKABLE void connectToDevice(QString address, QString name);
     Q_INVOKABLE void disconnectDevice();
 
-    Q_INVOKABLE void read(const QBluetoothUuid &service,
-                          const QBluetoothUuid &characteristic);
+    Q_INVOKABLE void readChar(unsigned int uuid);
 
     Q_INVOKABLE void write(const QBluetoothUuid &service,
                            const QBluetoothUuid &characteristic,
@@ -35,6 +36,8 @@ public:
 
     Q_INVOKABLE void enableNotifications(const QBluetoothUuid &service,
                                          const QBluetoothUuid &characteristic);
+
+    int batteryLevel() const;
 
 signals:
     void connected();
@@ -47,9 +50,20 @@ signals:
                       QBluetoothUuid characteristic,
                       QByteArray data);
 
-    void readCompleted(QBluetoothUuid service,
-                       QBluetoothUuid characteristic,
-                       QByteArray data);
+    void batteryLevelChanged();
+
+public slots:
+    void on_readCompleted(QBluetoothUuid service,
+                          QBluetoothUuid characteristic,
+                          QByteArray data);
+    void updateBattery(quint8 value)
+    {
+        if (m_batteryLevel == value)
+            return;
+
+        m_batteryLevel = value;
+        emit batteryLevelChanged();
+    }
 
 private:
     QThread m_thread;
@@ -58,4 +72,7 @@ private:
 
     void setupWorker();
     void teardown();
+
+    void read(const QBluetoothUuid &characteristic);
+    int m_batteryLevel;
 };
