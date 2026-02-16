@@ -156,6 +156,12 @@ ApplicationWindow {
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: devicePopup.open()
                             }
+                            Button {
+                                text: "Disconnect"
+                                width: 180
+                                Layout.alignment: Qt.AlignTop
+                                onClicked: bleConnection.disconnectDevice()
+                            }
 
                             Row {
                                 Layout.alignment: Qt.AlignTop
