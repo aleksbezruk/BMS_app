@@ -68,9 +68,24 @@ void BleConnection::teardown()
 
 void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteArray data)
 {
-    (void) s;
+    (void)s;
 
-    quint16 uuid = c.toUInt16();
+    quint16 uuid = 0;
+
+    // --- Battery level (standard 16-bit) ---
+    if (c.toUInt16() == 0x2A19) {
+        uuid = 0x2A19;
+    }
+    // --- Your custom 128-bit UUID ---
+    else if (c == QBluetoothUuid("37af9ae2-211d-4436-9d26-3a9ed02efeea")) {
+        qDebug() << "[AIOS] sw_state_char read completed";
+        uuid = 0x9AE2;   // your internal short ID
+    }
+    // --- fallback for other 16-bit UUIDs ---
+    else if (c.toUInt16()) {
+        uuid = c.toUInt16();
+    }
+
     switch (uuid) {
         case 0x2A19:
         {
@@ -80,6 +95,7 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
         case 0x9AE2:
         {
             qDebug() << "[AIOS], " << "SW state: " << static_cast<quint8>(data[0]);
+            setSwState(static_cast<quint8>(data[0]));
         }
         default:
         {
@@ -162,4 +178,17 @@ void BleConnection::enableNotifications(const QBluetoothUuid &s,
 int BleConnection::batteryLevel() const
 {
     return m_batteryLevel;
+}
+
+quint8 BleConnection::swState() const
+{
+    return m_swState;
+}
+
+void BleConnection::setSwState(quint8 newSwState)
+{
+    if (m_swState == newSwState)
+        return;
+    m_swState = newSwState;
+    emit swStateChanged();
 }

@@ -17,6 +17,8 @@ class BleConnection : public QObject
 
     Q_PROPERTY(int batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
 
+    Q_PROPERTY(quint8 swState READ swState WRITE setSwState NOTIFY swStateChanged)
+
 public:
     explicit BleConnection(QObject *parent = nullptr);
     ~BleConnection();
@@ -39,6 +41,9 @@ public:
 
     int batteryLevel() const;
 
+    quint8 swState() const;
+    void setSwState(quint8 newSwState);
+
 signals:
     void connected();
     void disconnected();
@@ -51,6 +56,8 @@ signals:
                       QByteArray data);
 
     void batteryLevelChanged();
+
+    void swStateChanged();
 
 public slots:
     void on_readCompleted(QBluetoothUuid service,
@@ -75,4 +82,5 @@ private:
 
     void read(const QBluetoothUuid &characteristic);
     int m_batteryLevel;
+    quint8 m_swState;
 };

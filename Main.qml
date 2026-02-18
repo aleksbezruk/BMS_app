@@ -166,6 +166,26 @@ ApplicationWindow {
                             }
                         }
 
+                        Column {
+                            spacing: 10
+
+                            Label {
+                                text: "Switches"
+                                font.bold: true
+                            }
+
+                            Switch {
+                                text: "Discharge";
+                                implicitHeight: 36
+                                checked: (bleConnection.swState & 1)
+                            }
+                            Switch {
+                                text: "Charge";
+                                implicitHeight: 36
+                                checked: (bleConnection.swState & 2)
+                            }
+                        }
+
                         // Read VBAT
                         RowLayout {
                             Layout.alignment: Qt.AlignTop
