@@ -5,6 +5,8 @@ BleConnection::BleConnection(QObject *parent)
     : QObject(parent)
 {
     setupWorker();
+
+    m_swState = 0;
 }
 
 BleConnection::~BleConnection()
@@ -141,6 +143,19 @@ void BleConnection::readChar(unsigned int uuid)
     qDebug() << "[read] " << "char: " << ch;
 
     read(ch);
+}
+
+void BleConnection::toggleSwitch(quint8 mask)
+{
+    m_swState = m_swState ^ mask;   // toggle
+    QByteArray data;
+    data.append(static_cast<char>(m_swState));
+
+    QBluetoothUuid ch, svc;
+    ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeea}");
+    svc = QBluetoothUuid(quint16(0x1815));
+
+    write(svc, ch, data, true); // with write response
 }
 
 void BleConnection::read(const QBluetoothUuid &c)

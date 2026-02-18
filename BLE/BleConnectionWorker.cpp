@@ -168,6 +168,7 @@ void BleConnectionWorker::processWriteQueue()
                     QLowEnergyService::WriteWithResponse :
                     QLowEnergyService::WriteWithoutResponse;
 
+    qDebug() << "Write char: " << r.characteristic.uuid().toUInt128() << " data = " << r.data;
     r.service->writeCharacteristic(r.characteristic, r.data, mode);
 
     if (!r.withResponse) {

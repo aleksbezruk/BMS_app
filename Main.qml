@@ -136,6 +136,7 @@ ApplicationWindow {
                         orientation: mainPage.portrait ? Qt.Horizontal : Qt.Vertical
                         Layout.fillWidth: mainPage.portrait
                         Layout.fillHeight: !mainPage.portrait
+                        background: blue
                     }
 
                     // ================= RIGHT PANEL =================
@@ -171,18 +172,23 @@ ApplicationWindow {
 
                             Label {
                                 text: "Switches"
+                                visible: bleConnection?.isConnected ? true: false
                                 font.bold: true
                             }
 
                             Switch {
                                 text: "Discharge";
                                 implicitHeight: 36
+                                visible: bleConnection?.isConnected ? true: false
                                 checked: (bleConnection.swState & 1)
+                                onToggled: bleConnection.toggleSwitch(0x01)
                             }
                             Switch {
                                 text: "Charge";
                                 implicitHeight: 36
+                                visible: bleConnection?.isConnected ? true: false
                                 checked: (bleConnection.swState & 2)
+                                onToggled: bleConnection.toggleSwitch(0x02)
                             }
                         }
 
@@ -190,28 +196,28 @@ ApplicationWindow {
                         RowLayout {
                             Layout.alignment: Qt.AlignTop
                             Button {
-                                text: "Connect to device"
-                                width: 180
+                                text: "Connect"
+                                width: 70
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: devicePopup.open()
                             }
                             Button {
                                 text: "Disconnect"
-                                width: 180
+                                width: 70
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: bleConnection.disconnectDevice()
                             }
                             Button {
                                 visible: bleConnection?.isConnected ? true: false
                                 text: "Read BAT"
-                                width: 180
+                                width: 70
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: bleConnection.readChar(0x2A19)
                             }
                             Button {
                                 visible: bleConnection?.isConnected ? true: false
-                                text: "Read switches"
-                                width: 180
+                                text: "Read SW"
+                                width: 70
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: bleConnection.readChar(0x9AE2)
                             }
@@ -315,7 +321,7 @@ ApplicationWindow {
                             Label {
                                 anchors.centerIn: parent
                                 text: toast.message
-                                color: "blue"
+                                color: "brown"
                             }
 
                             property string message: ""

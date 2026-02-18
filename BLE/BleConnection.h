@@ -39,6 +39,8 @@ public:
     Q_INVOKABLE void enableNotifications(const QBluetoothUuid &service,
                                          const QBluetoothUuid &characteristic);
 
+    Q_INVOKABLE void toggleSwitch(quint8 mask);
+
     int batteryLevel() const;
 
     quint8 swState() const;
