@@ -73,6 +73,8 @@ public slots:
         m_batteryLevel = value;
         emit batteryLevelChanged();
     }
+    void on_servicesReady();
+    void on_notification(QBluetoothUuid service, QBluetoothUuid characteristic, QByteArray data);
 
 private:
     QThread m_thread;

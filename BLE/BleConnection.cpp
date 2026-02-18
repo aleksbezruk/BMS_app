@@ -52,6 +52,12 @@ void BleConnection::setupWorker()
     connect(m_worker, &BleConnectionWorker::readCompleted,
             this, &BleConnection::on_readCompleted);
 
+    connect(this, &BleConnection::servicesReady,
+            this, &BleConnection::on_servicesReady);
+
+    connect(this, &BleConnection::notification,
+            this, &BleConnection::on_notification);
+
     m_thread.start();
 }
 
@@ -66,6 +72,21 @@ void BleConnection::teardown()
 
     m_thread.quit();
     m_thread.wait();
+}
+
+void BleConnection::on_servicesReady()
+{
+    // subscribe to BAS notifications (battery level in percent)
+    qDebug() << "Subscribe to BAS";
+    QBluetoothUuid bas_ch = QBluetoothUuid(quint16(0x2A19));
+    QBluetoothUuid bas_svc = QBluetoothUuid(quint16(0x180F));
+    enableNotifications(bas_svc, bas_ch);
+
+    // subscribe to AIOS notifications (BMS swicthes state)
+    qDebug() << "Subscribe to AIOS";
+    QBluetoothUuid aios_ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeea}");
+    QBluetoothUuid aios_svc = QBluetoothUuid(quint16(0x1815));
+    enableNotifications(aios_svc, aios_ch);
 }
 
 void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteArray data)
@@ -156,6 +177,20 @@ void BleConnection::toggleSwitch(quint8 mask)
     svc = QBluetoothUuid(quint16(0x1815));
 
     write(svc, ch, data, true); // with write response
+}
+
+ void BleConnection::on_notification(QBluetoothUuid service, QBluetoothUuid characteristic, QByteArray data)
+{
+     qDebug() << "Notification received, " << "characteristic: " << characteristic << " data=" << static_cast<quint8>(data[0]);
+
+    // --- Battery level (standard 16-bit) ---
+    if (characteristic.toUInt16() == 0x2A19) {
+        updateBattery(static_cast<quint8>(data[0]));
+    }
+    // --- AIOS custom 128-bit UUID ---
+    else if (characteristic == QBluetoothUuid("37af9ae2-211d-4436-9d26-3a9ed02efeea")) {
+        setSwState(static_cast<quint8>(data[0]));
+    }
 }
 
 void BleConnection::read(const QBluetoothUuid &c)
