@@ -152,27 +152,32 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
         }
         case 0x2BBA:
         {
-            // TOOD: implement call to UI
+            m_fullVbat = vbat;
+            emit fullVbatChanged();
             break;
         }
         case 0x2BB1:
         {
-            // TOOD: implement call to UI
+            m_bank1Volt = vbank1;
+            emit bank1VoltChanged();
             break;
         }
         case 0x2BB2:
         {
-            // TOOD: implement call to UI
+            m_bank2Volt = vbank2;
+            emit bank2VoltChanged();
             break;
         }
         case 0x2BB3:
         {
-            // TOOD: implement call to UI
+            m_bank3Volt = vbank3;
+            emit bank3VoltChanged();
             break;
         }
         case 0x2BB4:
         {
-            // TOOD: implement call to UI
+            m_bank4Volt = vbank4;
+            emit bank4VoltChanged();
             break;
         }
         default:
@@ -326,4 +331,29 @@ void BleConnection::setSwState(quint8 newSwState)
         return;
     m_swState = newSwState;
     emit swStateChanged();
+}
+
+qint16 BleConnection::fullVbat() const
+{
+    return m_fullVbat;
+}
+
+qint16 BleConnection::bank1Volt() const
+{
+    return m_bank1Volt;
+}
+
+qint16 BleConnection::bank2Volt() const
+{
+    return m_bank2Volt;
+}
+
+qint16 BleConnection::bank3Volt() const
+{
+    return m_bank3Volt;
+}
+
+qint16 BleConnection::bank4Volt() const
+{
+    return m_bank4Volt;
 }

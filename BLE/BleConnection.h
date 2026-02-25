@@ -19,6 +19,16 @@ class BleConnection : public QObject
 
     Q_PROPERTY(quint8 swState READ swState WRITE setSwState NOTIFY swStateChanged)
 
+    Q_PROPERTY(qint16 fullVbat READ fullVbat NOTIFY fullVbatChanged)
+
+    Q_PROPERTY(qint16 bank1Volt READ bank1Volt NOTIFY bank1VoltChanged)
+
+    Q_PROPERTY(qint16 bank2Volt READ bank2Volt NOTIFY bank2VoltChanged)
+
+    Q_PROPERTY(qint16 bank3Volt READ bank3Volt NOTIFY bank3VoltChanged)
+
+    Q_PROPERTY(qint16 bank4Volt READ bank4Volt NOTIFY bank4VoltChanged)
+
 public:
     explicit BleConnection(QObject *parent = nullptr);
     ~BleConnection();
@@ -46,6 +56,16 @@ public:
     quint8 swState() const;
     void setSwState(quint8 newSwState);
 
+    qint16 fullVbat() const;
+
+    qint16 bank1Volt() const;
+
+    qint16 bank2Volt() const;
+
+    qint16 bank3Volt() const;
+
+    qint16 bank4Volt() const;
+
 signals:
     void connected();
     void disconnected();
@@ -60,6 +80,16 @@ signals:
     void batteryLevelChanged();
 
     void swStateChanged();
+
+    void fullVbatChanged();
+
+    void bank1VoltChanged();
+
+    void bank2VoltChanged();
+
+    void bank3VoltChanged();
+
+    void bank4VoltChanged();
 
 public slots:
     void on_readCompleted(QBluetoothUuid service,
@@ -87,4 +117,9 @@ private:
     void read(const QBluetoothUuid &characteristic);
     int m_batteryLevel;
     quint8 m_swState;
+    qint16 m_fullVbat;
+    qint16 m_bank1Volt;
+    qint16 m_bank2Volt;
+    qint16 m_bank3Volt;
+    qint16 m_bank4Volt;
 };

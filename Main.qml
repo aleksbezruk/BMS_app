@@ -160,11 +160,36 @@ ApplicationWindow {
                                     visible: bleConnection?.isConnected ?? false
                                 }
                                 ColumnLayout {
-                                    spacing: 20
+                                    spacing: 5
                                     Text {
                                         visible: bleConnection?.isConnected ? true : false
                                         color: "green"
                                         text: "Battery: " + bleConnection.batteryLevel + "%"
+                                    }
+                                    Text {
+                                        visible: bleConnection?.isConnected ? true : false
+                                        color: "green"
+                                        text: "Vbat " + bleConnection.fullVbat + " mV"
+                                    }
+                                    Text {
+                                        visible: bleConnection?.isConnected ? true : false
+                                        color: "green"
+                                        text: "Bank1 " + bleConnection.bank1Volt + " mV"
+                                    }
+                                    Text {
+                                        visible: bleConnection?.isConnected ? true : false
+                                        color: "green"
+                                        text: "Bank2 " + bleConnection.bank2Volt + " mV"
+                                    }
+                                    Text {
+                                        visible: bleConnection?.isConnected ? true : false
+                                        color: "green"
+                                        text: "Bank3 " + bleConnection.bank3Volt + " mV"
+                                    }
+                                    Text {
+                                        visible: bleConnection?.isConnected ? true : false
+                                        color: "green"
+                                        text: "Bank4 " + bleConnection.bank4Volt + " mV"
                                     }
                                 }
                             }
@@ -212,8 +237,8 @@ ApplicationWindow {
                             }
                             Button {
                                 visible: bleConnection?.isConnected ? true: false
-                                text: "Read BAT"
-                                width: 70
+                                text: "VBAT"
+                                width: 50
                                 Layout.alignment: Qt.AlignTop
                                 function readVbat() {
                                     bleConnection.readChar(0x2A19);
@@ -226,7 +251,7 @@ ApplicationWindow {
                                 onClicked: readVbat()                            }
                             Button {
                                 visible: bleConnection?.isConnected ? true: false
-                                text: "Read SW"
+                                text: "SW"
                                 width: 70
                                 Layout.alignment: Qt.AlignTop
                                 onClicked: bleConnection.readChar(0x9AE2)
@@ -472,7 +497,7 @@ ApplicationWindow {
         // Tabs at the bottom to switch Pages
         TabBar {
             id: tabBar
-            Layout.alignment: Qt.AlignHCenter
+            Layout.alignment: Qt.AlignLeft
             Layout.bottomMargin: 12
 
             TabButton {
