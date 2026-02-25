@@ -159,10 +159,13 @@ ApplicationWindow {
                                     height: 64
                                     visible: bleConnection?.isConnected ?? false
                                 }
-                                Text {
-                                    visible: bleConnection?.isConnected ? true : false
-                                    color: "green"
-                                    text: "Battery: " + bleConnection.batteryLevel + "%"
+                                ColumnLayout {
+                                    spacing: 20
+                                    Text {
+                                        visible: bleConnection?.isConnected ? true : false
+                                        color: "green"
+                                        text: "Battery: " + bleConnection.batteryLevel + "%"
+                                    }
                                 }
                             }
                         }
@@ -212,8 +215,15 @@ ApplicationWindow {
                                 text: "Read BAT"
                                 width: 70
                                 Layout.alignment: Qt.AlignTop
-                                onClicked: bleConnection.readChar(0x2A19)
-                            }
+                                function readVbat() {
+                                    bleConnection.readChar(0x2A19);
+                                    bleConnection.readChar(0x2BBA);
+                                    bleConnection.readChar(0x2BB1);
+                                    bleConnection.readChar(0x2BB2);
+                                    bleConnection.readChar(0x2BB3);
+                                    bleConnection.readChar(0x2BB4);
+                                }
+                                onClicked: readVbat()                            }
                             Button {
                                 visible: bleConnection?.isConnected ? true: false
                                 text: "Read SW"

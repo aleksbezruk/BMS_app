@@ -1,6 +1,8 @@
 #include "BleConnection.h"
 #include "BleConnectionWorker.h"
 
+static qint16 _calcVbat(QByteArray data);
+
 BleConnection::BleConnection(QObject *parent)
     : QObject(parent)
 {
@@ -95,6 +97,12 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
 
     quint16 uuid = 0;
 
+    qint16 vbat = 0;
+    qint16 vbank1 = 0;
+    qint16 vbank2 = 0;
+    qint16 vbank3 = 0;
+    qint16 vbank4 = 0;
+
     // --- Battery level (standard 16-bit) ---
     if (c.toUInt16() == 0x2A19) {
         uuid = 0x2A19;
@@ -103,6 +111,27 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
     else if (c == QBluetoothUuid("37af9ae2-211d-4436-9d26-3a9ed02efeea")) {
         qDebug() << "[AIOS] sw_state_char read completed";
         uuid = 0x9AE2;   // your internal short ID
+    } else if (c == QBluetoothUuid("170ad8db-5244-4926-963e-417099122bba")) {
+        vbat = _calcVbat(data);
+        // qDebug() << "[AIOS] full_VBAT raw data: " <<  static_cast<quint16>(data[0]) << ", " << static_cast<quint16>(data[1]);
+        qDebug() << "[AIOS] full_VBAT read completed: " << vbat;
+        uuid = 0x2BBA;   // your internal short ID
+    } else if (c == QBluetoothUuid("170ad8db-5244-4926-963e-417099122bb1")) {
+        vbank1 = _calcVbat(data);
+        qDebug() << "[AIOS] bank1 read completed: " << vbank1;
+        uuid = 0x2BB1;   // your internal short ID
+    } else if (c == QBluetoothUuid("170ad8db-5244-4926-963e-417099122bb2")) {
+        vbank2 = _calcVbat(data);
+        qDebug() << "[AIOS] bank2 read completed: " << vbank2;
+        uuid = 0x2BB2;   // your internal short ID
+    } else if (c == QBluetoothUuid("170ad8db-5244-4926-963e-417099122bb3")) {
+        vbank3 = _calcVbat(data);
+        qDebug() << "[AIOS] bank3 read completed: " << vbank3;
+        uuid = 0x2BB3;   // your internal short ID
+    } else if (c == QBluetoothUuid("170ad8db-5244-4926-963e-417099122bb4")) {
+        vbank4 = _calcVbat(data);
+        qDebug() << "[AIOS] bank4 read completed: " << vbank4;
+        uuid = 0x2BB4;   // your internal short ID
     }
     // --- fallback for other 16-bit UUIDs ---
     else if (c.toUInt16()) {
@@ -119,12 +148,50 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
         {
             qDebug() << "[AIOS], " << "SW state: " << static_cast<quint8>(data[0]);
             setSwState(static_cast<quint8>(data[0]));
+            break;
+        }
+        case 0x2BBA:
+        {
+            // TOOD: implement call to UI
+            break;
+        }
+        case 0x2BB1:
+        {
+            // TOOD: implement call to UI
+            break;
+        }
+        case 0x2BB2:
+        {
+            // TOOD: implement call to UI
+            break;
+        }
+        case 0x2BB3:
+        {
+            // TOOD: implement call to UI
+            break;
+        }
+        case 0x2BB4:
+        {
+            // TOOD: implement call to UI
+            break;
         }
         default:
         {
             break;
         }
     }
+}
+
+static qint16 _calcVbat(QByteArray data)
+{
+    qint16 vbat = 0;
+
+    quint8 lsb = static_cast<quint8>(data[0]);
+    quint8 msb = static_cast<quint8>(data[1]);
+
+    vbat = (((quint16) lsb) & 0x00FF) | (((quint16) msb) <<8);
+
+    return vbat;
 }
 
 //
@@ -157,6 +224,21 @@ void BleConnection::readChar(unsigned int uuid)
     if (uuid == 0x9AE2) {
         // 128-bit UUIDs
         ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeea}");
+    } else if (uuid == 0x2BBA) {
+        // Full VBAT in mV
+        ch = QBluetoothUuid("{170ad8db-5244-4926-963e-417099122bba}");
+    } else if (uuid == 0x2BB1) {
+        // Bank1 in mV
+        ch = QBluetoothUuid("{170ad8db-5244-4926-963e-417099122bb1}");
+    } else if (uuid == 0x2BB2) {
+        // Bank2 in mV
+        ch = QBluetoothUuid("{170ad8db-5244-4926-963e-417099122bb2}");
+    } else if (uuid == 0x2BB3) {
+        // Bank3 in mV
+        ch = QBluetoothUuid("{170ad8db-5244-4926-963e-417099122bb3}");
+    } else if (uuid == 0x2BB4) {
+        // Bank4 in mV
+        ch = QBluetoothUuid("{170ad8db-5244-4926-963e-417099122bb4}");
     } else {
         // 16-bit UUIDs
         ch = QBluetoothUuid(quint16(uuid));
@@ -164,6 +246,9 @@ void BleConnection::readChar(unsigned int uuid)
     qDebug() << "[read] " << "char: " << ch;
 
     read(ch);
+
+    // add some delay between reads to avoid stack overloading
+    // QThread::msleep(500);
 }
 
 void BleConnection::toggleSwitch(quint8 mask)
