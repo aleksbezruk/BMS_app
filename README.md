@@ -1,4 +1,4 @@
-# Battery Mnagement System (BMS) app on BLE
+# Battery Management System (BMS) app on BLE
 
 ---
 ## Features
