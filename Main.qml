@@ -8,6 +8,10 @@ ApplicationWindow {
     visible: true
     title: qsTr("BMS Application")
 
+    background: Rectangle {
+        color: "lightblue"
+    }
+
     property BleConnection bleConnection: null
 
     ColumnLayout {
@@ -25,6 +29,10 @@ ApplicationWindow {
             Page {
                 id: mainPage
                 property bool portrait: width < height
+
+                background: Rectangle {
+                    color: "lightblue"
+                }
 
                 contentItem: GridLayout {
                     anchors.fill: parent
@@ -48,15 +56,35 @@ ApplicationWindow {
                             Button {
                                 text: "Find BMS"
                                 width: 100
-                                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                Layout.margins: 8
+                                background: Rectangle {
+                                    radius: 6
+                                    color: parent.down ? "#1976D2" :
+                                           parent.hovered ? "#2196F3" : "#42A5F5"
+                                }
+                                contentItem: Text {
+                                    text: parent.text
+                                    color: "blue"
+                                    font.bold: true
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
                                 onClicked: bleManager.startScan()
                             }
                             Button {
                                 text: "Stop Scan"
                                 width: 120
-                                Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                                Layout.margins: 8
+                                background: Rectangle {
+                                    radius: 6
+                                    color: parent.down ? "#1976D2" :
+                                           parent.hovered ? "#2196F3" : "#42A5F5"
+                                }
+                                contentItem: Text {
+                                    text: parent.text
+                                    color: "blue"
+                                    font.bold: true
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
                                 onClicked: {
                                     bleManager.stopScan()
                                     bmsDevices.clear()
@@ -71,9 +99,15 @@ ApplicationWindow {
                             function isBMSdevice(name) {
                                 return (name === "QN9080_BMS" || name === "BMS_MCU")
                             }
-
+                            function deviceExists(address) {
+                                for (var i = 0; i < bmsDevices.count; ++i) {
+                                    if (bmsDevices.get(i).address === address)
+                                        return true
+                                }
+                                return false
+                            }
                             function onDeviceFound(address, name, vbatLvl) {
-                                if (isBMSdevice(name)) {
+                                if (!deviceExists(address) && isBMSdevice(name)) {
                                     bmsDevices.append({ address: address, name: name, vbat: vbatLvl })
                                 }
                             }
@@ -97,9 +131,9 @@ ApplicationWindow {
 
                             delegate: Rectangle {
                                 width: bmsList.width
-                                height: 56
+                                height: 80
                                 radius: 6
-                                color: index % 2 ? "#202020" : "#2a2a2a"
+                                color: "lightblue"
 
                                 Column {
                                     anchors.fill: parent
@@ -108,14 +142,14 @@ ApplicationWindow {
 
                                     Text {
                                         text: name
-                                        color: "white"
+                                        color: "black"
                                         font.bold: true
                                         elide: Text.ElideRight
                                     }
 
                                     Text {
                                         text: address
-                                        color: "#aaaaaa"
+                                        color: "black"
                                         font.pixelSize: 12
                                         elide: Text.ElideRight
                                     }
@@ -123,7 +157,7 @@ ApplicationWindow {
                                     Text {
                                         text: vbat + "%"
                                         color: "green"
-                                        font.pixelSize: 12
+                                        font.pixelSize: 14
                                         elide: Text.ElideRight
                                     }
                                 }
@@ -136,7 +170,9 @@ ApplicationWindow {
                         orientation: mainPage.portrait ? Qt.Horizontal : Qt.Vertical
                         Layout.fillWidth: mainPage.portrait
                         Layout.fillHeight: !mainPage.portrait
-                        background: blue
+                        background: Rectangle {
+                            color: "lightgreen"
+                        }
                     }
 
                     // ================= RIGHT PANEL =================
@@ -153,44 +189,91 @@ ApplicationWindow {
                             Layout.alignment: Qt.AlignTop
                             Row {
                                 Layout.alignment: Qt.AlignTop
+                                spacing: 10
                                 Image {
                                     source: "images/battery.png"
                                     width: 64
                                     height: 64
-                                    visible: bleConnection?.isConnected ?? false
+                                    visible: bleConnection?.isConnected? ((bleConnection.batteryLevel > 60)? true: false): false
+                                }
+                                Image {
+                                    source: "images/battery_yellow.png"
+                                    width: 64
+                                    height: 64
+                                    visible: bleConnection?.isConnected? ((bleConnection.batteryLevel <= 60 && bleConnection.batteryLevel > 20)? true: false): false
+                                }
+                                Image {
+                                    source: "images/battery_red.png"
+                                    width: 64
+                                    height: 64
+                                    visible: bleConnection?.isConnected? ((bleConnection.batteryLevel <= 20)? true: false): false
                                 }
                                 ColumnLayout {
                                     spacing: 5
                                     Text {
                                         visible: bleConnection?.isConnected ? true : false
-                                        color: "green"
+                                        color: "blue"
                                         text: "Battery: " + bleConnection.batteryLevel + "%"
                                     }
                                     Text {
                                         visible: bleConnection?.isConnected ? true : false
-                                        color: "green"
+                                        color: "blue"
                                         text: "Vbat " + bleConnection.fullVbat + " mV"
                                     }
                                     Text {
                                         visible: bleConnection?.isConnected ? true : false
-                                        color: "green"
+                                        color: "blue"
                                         text: "Bank1 " + bleConnection.bank1Volt + " mV"
                                     }
                                     Text {
                                         visible: bleConnection?.isConnected ? true : false
-                                        color: "green"
+                                        color: "blue"
                                         text: "Bank2 " + bleConnection.bank2Volt + " mV"
                                     }
                                     Text {
                                         visible: bleConnection?.isConnected ? true : false
-                                        color: "green"
+                                        color: "blue"
                                         text: "Bank3 " + bleConnection.bank3Volt + " mV"
                                     }
                                     Text {
                                         visible: bleConnection?.isConnected ? true : false
-                                        color: "green"
+                                        color: "blue"
                                         text: "Bank4 " + bleConnection.bank4Volt + " mV"
                                     }
+                                }
+                                Button {
+                                    text: "Connect"
+                                    width: 70
+                                    background: Rectangle {
+                                        radius: 6
+                                        color: parent.down ? "#1976D2" :
+                                               parent.hovered ? "#2196F3" : "#42A5F5"
+                                    }
+                                    contentItem: Text {
+                                        text: parent.text
+                                        color: "blue"
+                                        font.bold: true
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                    onClicked: devicePopup.open()
+                                }
+                                Button {
+                                    text: "Disconnect"
+                                    width: 90
+                                    background: Rectangle {
+                                        radius: 6
+                                        color: parent.down ? "#1976D2" :
+                                               parent.hovered ? "#2196F3" : "#42A5F5"
+                                    }
+                                    contentItem: Text {
+                                        text: parent.text
+                                        color: "blue"
+                                        font.bold: true
+                                        horizontalAlignment: Text.AlignHCenter
+                                        verticalAlignment: Text.AlignVCenter
+                                    }
+                                    onClicked: bleConnection.disconnectDevice()
                                 }
                             }
                         }
@@ -202,21 +285,45 @@ ApplicationWindow {
                                 text: "Switches"
                                 visible: bleConnection?.isConnected ? true: false
                                 font.bold: true
+                                color: "blue"
                             }
 
                             Switch {
-                                text: "Discharge";
+                                id: dischargeSwitch
+                                text: "Discharge"
                                 implicitHeight: 36
-                                visible: bleConnection?.isConnected ? true: false
+                                visible: bleConnection?.isConnected ?? false
                                 checked: (bleConnection.swState & 1)
+
                                 onToggled: bleConnection.toggleSwitch(0x01)
+
+                                contentItem: Text {
+                                    text: dischargeSwitch.text
+                                    color: "blue"
+                                    verticalAlignment: Text.AlignVCenter
+
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: dischargeSwitch.indicator.width + 8
+                                }
                             }
                             Switch {
+                                id: chargeSwitch
                                 text: "Charge";
                                 implicitHeight: 36
                                 visible: bleConnection?.isConnected ? true: false
                                 checked: (bleConnection.swState & 2)
                                 onToggled: bleConnection.toggleSwitch(0x02)
+
+                                contentItem: Text {
+                                    text: chargeSwitch.text
+                                    color: "blue"
+                                    verticalAlignment: Text.AlignVCenter
+
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: chargeSwitch.indicator.width + 8
+                                }
                             }
                         }
 
@@ -224,22 +331,21 @@ ApplicationWindow {
                         RowLayout {
                             Layout.alignment: Qt.AlignTop
                             Button {
-                                text: "Connect"
-                                width: 70
-                                Layout.alignment: Qt.AlignTop
-                                onClicked: devicePopup.open()
-                            }
-                            Button {
-                                text: "Disconnect"
-                                width: 70
-                                Layout.alignment: Qt.AlignTop
-                                onClicked: bleConnection.disconnectDevice()
-                            }
-                            Button {
                                 visible: bleConnection?.isConnected ? true: false
                                 text: "VBAT"
                                 width: 50
-                                Layout.alignment: Qt.AlignTop
+                                background: Rectangle {
+                                    radius: 6
+                                    color: parent.down ? "#1976D2" :
+                                           parent.hovered ? "#2196F3" : "#42A5F5"
+                                }
+                                contentItem: Text {
+                                    text: parent.text
+                                    color: "blue"
+                                    font.bold: true
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
                                 function readVbat() {
                                     bleConnection.readChar(0x2A19);
                                     bleConnection.readChar(0x2BBA);
@@ -252,8 +358,19 @@ ApplicationWindow {
                             Button {
                                 visible: bleConnection?.isConnected ? true: false
                                 text: "SW"
-                                width: 70
-                                Layout.alignment: Qt.AlignTop
+                                width: 50
+                                background: Rectangle {
+                                    radius: 6
+                                    color: parent.down ? "#1976D2" :
+                                           parent.hovered ? "#2196F3" : "#42A5F5"
+                                }
+                                contentItem: Text {
+                                    text: parent.text
+                                    color: "blue"
+                                    font.bold: true
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                }
                                 onClicked: bleConnection.readChar(0x9AE2)
                             }
                         }
@@ -356,7 +473,7 @@ ApplicationWindow {
                             Label {
                                 anchors.centerIn: parent
                                 text: toast.message
-                                color: "brown"
+                                color: "green"
                             }
 
                             property string message: ""
@@ -379,6 +496,9 @@ ApplicationWindow {
 
             // Page with debug information
             Page {
+                background: Rectangle {
+                    color: "lightblue"
+                }
                 Connections {
                     target: bleManager
                     function deviceExists(address) {
@@ -414,19 +534,23 @@ ApplicationWindow {
                     anchors.fill: parent
                     spacing: 8
 
-                    // Title
-                    Label {
-                        text: "Logs"
-                        font.pixelSize: 18
-                        Layout.alignment: Qt.AlignLeft
-                        Layout.leftMargin: 12
-                    }
-
                     // Clear button
                     Button {
                         text: "Clear Log"
                         Layout.alignment: Qt.AlignLeft
                         Layout.leftMargin: 12
+                        background: Rectangle {
+                            radius: 6
+                            color: parent.down ? "#1976D2" :
+                                   parent.hovered ? "#2196F3" : "#42A5F5"
+                        }
+                        contentItem: Text {
+                            text: parent.text
+                            color: "blue"
+                            font.bold: true
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                        }
                         onClicked: bleDevicesModel.clear()
                     }
 
@@ -450,7 +574,7 @@ ApplicationWindow {
 
                         delegate: Rectangle {
                             width: bleList.width/3
-                            height: 56
+                            height: 70
                             radius: 6
                             color: index % 2 ? "#202020" : "#2a2a2a"
 
