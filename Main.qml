@@ -92,6 +92,15 @@ ApplicationWindow {
                             }
                         }
 
+                        // Scanning status
+                        Text {
+                            text: "Scan in progress..."
+                            color: "black"
+                            font.bold: true
+                            visible: bleManager.scanning
+                            elide: Text.ElideRight
+                        }
+
                         // BLE scan callbacks
                         Connections {
                             target: bleManager
@@ -171,7 +180,7 @@ ApplicationWindow {
                         Layout.fillWidth: mainPage.portrait
                         Layout.fillHeight: !mainPage.portrait
                         background: Rectangle {
-                            color: "lightgreen"
+                            color: "lightblue"
                         }
                     }
 
@@ -576,7 +585,8 @@ ApplicationWindow {
                             width: bleList.width/3
                             height: 70
                             radius: 6
-                            color: index % 2 ? "#202020" : "#2a2a2a"
+                            //color: index % 2 ? "#202020" : "#2a2a2a"
+                            color: "lightblue"
 
                             Column {
                                 anchors.fill: parent
@@ -585,14 +595,14 @@ ApplicationWindow {
 
                                 Text {
                                     text: name
-                                    color: "white"
+                                    color: "black"
                                     font.bold: true
                                     elide: Text.ElideRight
                                 }
 
                                 Text {
                                     text: address
-                                    color: "#aaaaaa"
+                                    color: "black"
                                     font.pixelSize: 12
                                     elide: Text.ElideRight
                                 }
@@ -638,7 +648,7 @@ ApplicationWindow {
                 }
 
                 background: Rectangle {
-                    color: parent.checked ? "magenta" : "black"
+                    color: parent.checked ? "grey" : "black"
                 }
             }
 
@@ -656,7 +666,7 @@ ApplicationWindow {
                 }
 
                 background: Rectangle {
-                    color: parent.checked ? "magenta" : "black"
+                    color: parent.checked ? "grey" : "black"
                 }
             }
         }
