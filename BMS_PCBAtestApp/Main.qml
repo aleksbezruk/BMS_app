@@ -8,6 +8,8 @@ ApplicationWindow {
     visible: true
     title: qsTr("BMS test App")
 
+    property BleConnection bleConnection: null
+
     Rectangle {
         id: searchBMS_dialog
         x: 8
@@ -103,11 +105,98 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.leftMargin: 5
-            anchors.topMargin: 45
+            anchors.topMargin: 60
             highlighted: true
             font.styleName: "ExtraBold"
             font.pointSize: 14
             onClicked: bmsListModel.clear()
+        }
+
+        Button {
+            id: connect_button
+            text: qsTr("Connect")
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.leftMargin: 5
+            anchors.topMargin: 118
+            highlighted: true
+            font.styleName: "ExtraBold"
+            font.pointSize: 14
+            onClicked: devicePopup.open()
+        }
+
+        Button {
+            id: disconnect_button
+            text: qsTr("Disconnect")
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.leftMargin: 5
+            anchors.topMargin: 167
+            font.styleName: "ExtraBold"
+            font.pointSize: 14
+            highlighted: true
+            onClicked: bleConnection.disconnectDevice()
+        }
+
+        // ================= DEVICE POPUP =================
+        Popup {
+            id: devicePopup
+            width: parent.width * 0.4
+            height: parent.height * 0.7
+            modal: true
+            focus: true
+            anchors.centerIn: parent
+
+            Rectangle {
+                anchors.fill: parent
+                color: "#303030"
+                radius: 8
+
+                ListView {
+                    anchors.fill: parent
+                    model: bmsListModel
+
+                    delegate: Rectangle {
+                        width: devicePopup.width
+                        height: 60
+                        color: "#444"
+
+                        Text {
+                            anchors.centerIn: parent
+                            text: name + " (" + address + ")"
+                            color: "white"
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            onClicked: {
+
+                                devicePopup.close()
+
+                                if (bleConnection) {
+                                    console.log("Destroying previous BLE connection")
+                                    bleConnection.disconnectDevice()
+                                    bleConnection.destroy()
+                                    bleConnection = null
+                                }
+
+                                bleConnection = Qt.createQmlObject(`
+                                    import BMS_PCBAtestApp
+                                    BleConnection {}
+                                `, searchBMS_dialog)
+
+                                console.log("Created BleConnection for", address)
+
+                                bleConnection.error.connect((err) => {
+                                    console.log("BLE error:", err)
+                                })
+
+                                bleConnection.connectToDevice(address, name)
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
