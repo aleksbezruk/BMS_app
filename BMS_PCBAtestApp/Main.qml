@@ -43,7 +43,29 @@ ApplicationWindow {
             flat: false
             icon.color: "#454444"
             clip: false
-            onClicked: bmsListModel.append({"name": "Device 1", "address": "192.168.0.10"})
+            //onClicked: bmsListModel.append({"name": "Device 1", "address": "192.168.0.10"})
+            onClicked: bleManager.startScan()
+        }
+
+        // BLE scan callbacks
+        Connections {
+            target: bleManager
+
+            function isBMSdevice(name) {
+                return (name === "QN9080_BMS" || name === "BMS_MCU")
+            }
+            function deviceExists(address) {
+                for (var i = 0; i < bmsListModel.count; ++i) {
+                    if (bmsListModel.get(i).address === address)
+                        return true
+                }
+                return false
+            }
+            function onDeviceFound(address, name, vbatLvl) {
+                if (!deviceExists(address) && isBMSdevice(name)) {
+                    bmsListModel.append({ address: address, name: name })
+                }
+            }
         }
 
         ListView {

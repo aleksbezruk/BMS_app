@@ -4,7 +4,13 @@ project(BMS_PCBAtestApp VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Quick)
+find_package(Qt6 REQUIRED COMPONENTS
+    Core
+    Gui
+    Qml
+    Quick
+    Bluetooth
+)
 
 qt_standard_project_setup(REQUIRES 6.8)
 
@@ -12,10 +18,31 @@ qt_add_executable(appBMS_PCBAtestApp
     main.cpp
 )
 
+target_compile_definitions(appBMS_PCBAtestApp
+    PRIVATE
+        USE_QT_BLUETOOTH
+        BMS_TEST_APP
+)
+
+target_include_directories(appBMS_PCBAtestApp PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../BLE
+)
+
 qt_add_qml_module(appBMS_PCBAtestApp
     URI BMS_PCBAtestApp
     QML_FILES
         Main.qml
+    SOURCES
+        ../BLE/BleConnection.cpp
+        ../BLE/BleConnection.h
+        ../BLE/BleConnectionWorker.cpp
+        ../BLE/BleConnectionWorker.h
+        ../BLE/bledevice.h
+        ../BLE/blemanager.cpp
+        ../BLE/blemanager.h
+        ../BLE/blescannerworker.cpp
+        ../BLE/blescannerworker.h
 )
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
@@ -29,8 +56,10 @@ set_target_properties(appBMS_PCBAtestApp PROPERTIES
     WIN32_EXECUTABLE TRUE
 )
 
-target_link_libraries(appBMS_PCBAtestApp
-    PRIVATE Qt6::Quick
+target_link_libraries(appBMS_PCBAtestApp PRIVATE
+    Qt6::Core Qt6::Gui Qt6::Qml Qt6::Quick
+    Qt6::Bluetooth
+    Threads::Threads
 )
 
 include(GNUInstallDirs)
