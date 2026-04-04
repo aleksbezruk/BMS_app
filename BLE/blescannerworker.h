@@ -1,3 +1,7 @@
+/**
+ * @file blescannerworker.h
+ */
+
 #ifndef BLESCANNERWORKER_H
 #define BLESCANNERWORKER_H
 

@@ -4,6 +4,9 @@ project(BMS_PCBAtestApp VERSION 0.1 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(USE_SIMPLEBLE "Use SimpleBLE backend (Desktop only)" OFF)
+option(PCBA_TEST_APP "PCBA test application" ON)
+
 find_package(Qt6 REQUIRED COMPONENTS
     Core
     Gui
@@ -21,7 +24,7 @@ qt_add_executable(appBMS_PCBAtestApp
 target_compile_definitions(appBMS_PCBAtestApp
     PRIVATE
         USE_QT_BLUETOOTH
-        BMS_TEST_APP
+        PCBA_TEST_APP
 )
 
 target_include_directories(appBMS_PCBAtestApp PRIVATE

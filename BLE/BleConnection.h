@@ -15,19 +15,15 @@ class BleConnection : public QObject
 
     Q_PROPERTY(bool isConnected READ isConnected NOTIFY connectedChanged)
 
+#if !defined(PCBA_TEST_APP)
     Q_PROPERTY(int batteryLevel READ batteryLevel NOTIFY batteryLevelChanged)
-
     Q_PROPERTY(quint8 swState READ swState WRITE setSwState NOTIFY swStateChanged)
-
     Q_PROPERTY(qint16 fullVbat READ fullVbat NOTIFY fullVbatChanged)
-
     Q_PROPERTY(qint16 bank1Volt READ bank1Volt NOTIFY bank1VoltChanged)
-
     Q_PROPERTY(qint16 bank2Volt READ bank2Volt NOTIFY bank2VoltChanged)
-
     Q_PROPERTY(qint16 bank3Volt READ bank3Volt NOTIFY bank3VoltChanged)
-
     Q_PROPERTY(qint16 bank4Volt READ bank4Volt NOTIFY bank4VoltChanged)
+#endif  //PCBA_TEST_APP
 
 public:
     explicit BleConnection(QObject *parent = nullptr);
@@ -49,22 +45,19 @@ public:
     Q_INVOKABLE void enableNotifications(const QBluetoothUuid &service,
                                          const QBluetoothUuid &characteristic);
 
+#if !defined(PCBA_TEST_APP)
     Q_INVOKABLE void toggleSwitch(quint8 mask);
-
     int batteryLevel() const;
 
     quint8 swState() const;
     void setSwState(quint8 newSwState);
 
     qint16 fullVbat() const;
-
     qint16 bank1Volt() const;
-
     qint16 bank2Volt() const;
-
     qint16 bank3Volt() const;
-
     qint16 bank4Volt() const;
+#endif  //PCBA_TEST_APP
 
 signals:
     void connected();
@@ -77,24 +70,21 @@ signals:
                       QBluetoothUuid characteristic,
                       QByteArray data);
 
+#if !defined(PCBA_TEST_APP)
     void batteryLevelChanged();
-
     void swStateChanged();
-
     void fullVbatChanged();
-
     void bank1VoltChanged();
-
     void bank2VoltChanged();
-
     void bank3VoltChanged();
-
     void bank4VoltChanged();
+#endif  //PCBA_TEST_APP
 
 public slots:
     void on_readCompleted(QBluetoothUuid service,
                           QBluetoothUuid characteristic,
                           QByteArray data);
+#if !defined(PCBA_TEST_APP)
     void updateBattery(quint8 value)
     {
         if (m_batteryLevel == value)
@@ -103,6 +93,7 @@ public slots:
         m_batteryLevel = value;
         emit batteryLevelChanged();
     }
+#endif  //PCBA_TEST_APP
     void on_servicesReady();
     void on_notification(QBluetoothUuid service, QBluetoothUuid characteristic, QByteArray data);
 
@@ -115,6 +106,8 @@ private:
     void teardown();
 
     void read(const QBluetoothUuid &characteristic);
+
+#if !defined(PCBA_TEST_APP)
     int m_batteryLevel;
     quint8 m_swState;
     qint16 m_fullVbat;
@@ -122,4 +115,5 @@ private:
     qint16 m_bank2Volt;
     qint16 m_bank3Volt;
     qint16 m_bank4Volt;
+#endif  //PCBA_TEST_APP
 };

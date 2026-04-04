@@ -8,7 +8,9 @@ BleConnection::BleConnection(QObject *parent)
 {
     setupWorker();
 
+#if !defined(PCBA_TEST_APP)
     m_swState = 0;
+#endif  //PCBA_TEST_APP
 }
 
 BleConnection::~BleConnection()
@@ -78,6 +80,7 @@ void BleConnection::teardown()
 
 void BleConnection::on_servicesReady()
 {
+#if !defined(PCBA_TEST_APP)
     // subscribe to BAS notifications (battery level in percent)
     qDebug() << "Subscribe to BAS";
     QBluetoothUuid bas_ch = QBluetoothUuid(quint16(0x2A19));
@@ -89,6 +92,9 @@ void BleConnection::on_servicesReady()
     QBluetoothUuid aios_ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeea}");
     QBluetoothUuid aios_svc = QBluetoothUuid(quint16(0x1815));
     enableNotifications(aios_svc, aios_ch);
+#else
+    // TODO: implement for PCBA test app
+#endif  //PCBA_TEST_APP
 }
 
 void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteArray data)
@@ -133,12 +139,19 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
         qDebug() << "[AIOS] bank4 read completed: " << vbank4;
         uuid = 0x2BB4;   // your internal short ID
     }
+#if defined(PCBA_TEST_APP)
+    else if (c == QBluetoothUuid("37af9ae2-211d-4436-9d26-3a9ed02efeeb")) {
+        qDebug() << "[AIOS] trim read completed";
+        uuid = 0x9AE3;   // your internal short ID
+    }
+#endif  //PCBA_TEST_APP
     // --- fallback for other 16-bit UUIDs ---
     else if (c.toUInt16()) {
         uuid = c.toUInt16();
     }
 
     switch (uuid) {
+#if !defined(PCBA_TEST_APP)
         case 0x2A19:
         {
             updateBattery(static_cast<quint8>(data[0]));
@@ -180,6 +193,15 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
             emit bank4VoltChanged();
             break;
         }
+#endif  //PCBA_TEST_APP
+#if defined(PCBA_TEST_APP)
+        case 0x9AE3:
+        {
+            qDebug() << "[AIOS], " << "PCBA: " << data;
+            // TOD: implement fo PCBA test trim
+            break;
+        }
+#endif  //PCBA_TEST_APP
         default:
         {
             break;
@@ -244,7 +266,11 @@ void BleConnection::readChar(unsigned int uuid)
     } else if (uuid == 0x2BB4) {
         // Bank4 in mV
         ch = QBluetoothUuid("{170ad8db-5244-4926-963e-417099122bb4}");
-    } else {
+    } else if (uuid == 0x9AE3) {
+        // 128-bit UUIDs
+        ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeeb}");
+    }
+    else {
         // 16-bit UUIDs
         ch = QBluetoothUuid(quint16(uuid));
     }
@@ -256,6 +282,7 @@ void BleConnection::readChar(unsigned int uuid)
     // QThread::msleep(500);
 }
 
+#if !defined(PCBA_TEST_APP)
 void BleConnection::toggleSwitch(quint8 mask)
 {
     m_swState = m_swState ^ mask;   // toggle
@@ -268,11 +295,13 @@ void BleConnection::toggleSwitch(quint8 mask)
 
     write(svc, ch, data, true); // with write response
 }
+#endif  //PCBA_TEST_APP
 
  void BleConnection::on_notification(QBluetoothUuid service, QBluetoothUuid characteristic, QByteArray data)
 {
-     qDebug() << "Notification received, " << "characteristic: " << characteristic << " data=" << static_cast<quint8>(data[0]);
+    qDebug() << "Notification received, " << "characteristic: " << characteristic << " data=" << static_cast<quint8>(data[0]);
 
+#if !defined(PCBA_TEST_APP)
     // --- Battery level (standard 16-bit) ---
     if (characteristic.toUInt16() == 0x2A19) {
         updateBattery(static_cast<quint8>(data[0]));
@@ -281,6 +310,11 @@ void BleConnection::toggleSwitch(quint8 mask)
     else if (characteristic == QBluetoothUuid("37af9ae2-211d-4436-9d26-3a9ed02efeea")) {
         setSwState(static_cast<quint8>(data[0]));
     }
+#else
+    if (characteristic == QBluetoothUuid("37af9ae2-211d-4436-9d26-3a9ed02efeeb")) {
+        // TODO: app PCBA trim
+    }
+#endif  //PCBA_TEST_APP
 }
 
 void BleConnection::read(const QBluetoothUuid &c)
@@ -315,6 +349,7 @@ void BleConnection::enableNotifications(const QBluetoothUuid &s,
                               Q_ARG(QBluetoothUuid, c));
 }
 
+#if !defined(PCBA_TEST_APP)
 int BleConnection::batteryLevel() const
 {
     return m_batteryLevel;
@@ -357,3 +392,4 @@ qint16 BleConnection::bank4Volt() const
 {
     return m_bank4Volt;
 }
+#endif  //PCBA_TEST_APP
