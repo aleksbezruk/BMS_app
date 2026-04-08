@@ -6,6 +6,21 @@
 
 #include <QtQml/qqmlregistration.h>
 
+#if defined(PCBA_TEST_APP)
+#pragma pack(push, 1)
+struct Pcba_trim_data {
+    uint8_t  mode;
+    uint8_t adcErr;
+    uint32_t b1ConvRatio;
+    uint32_t b2ConvRatio;
+    uint32_t b3ConvRatio;
+    uint32_t b4ConvRatio;
+    uint8_t adcInt;
+    uint16_t advInt;
+};
+#pragma pack(pop)
+#endif  //PCBA_TEST_APP
+
 class BleConnectionWorker;
 
 class BleConnection : public QObject
@@ -44,6 +59,10 @@ public:
 
     Q_INVOKABLE void enableNotifications(const QBluetoothUuid &service,
                                          const QBluetoothUuid &characteristic);
+
+#if defined(PCBA_TEST_APP)
+    Q_INVOKABLE void handleTrim(const QByteArray &data);
+#endif  //PCBA_TEST_APP
 
 #if !defined(PCBA_TEST_APP)
     Q_INVOKABLE void toggleSwitch(quint8 mask);
@@ -115,5 +134,7 @@ private:
     qint16 m_bank2Volt;
     qint16 m_bank3Volt;
     qint16 m_bank4Volt;
+#else
+    Pcba_trim_data m_trim_data;
 #endif  //PCBA_TEST_APP
 };

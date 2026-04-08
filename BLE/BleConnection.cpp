@@ -198,7 +198,7 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
         case 0x9AE3:
         {
             qDebug() << "[AIOS], " << "PCBA: " << data;
-            // TOD: implement fo PCBA test trim
+            // TODO: implement fo PCBA test trim
             break;
         }
 #endif  //PCBA_TEST_APP
@@ -348,6 +348,35 @@ void BleConnection::enableNotifications(const QBluetoothUuid &s,
                               Q_ARG(QBluetoothUuid, s),
                               Q_ARG(QBluetoothUuid, c));
 }
+
+#if defined(PCBA_TEST_APP)
+void BleConnection::handleTrim(const QByteArray &data)
+{
+    if (data.size() != sizeof(Pcba_trim_data)) {
+        qDebug() << "Invalid trim packet size";
+        return;
+    }
+
+    memcpy(&this->m_trim_data, data.constData(), sizeof(Pcba_trim_data));
+
+    qDebug() << "trim mode:" << this->m_trim_data.mode;
+    qDebug() << "ADC error:" << this->m_trim_data.adcErr;
+    qDebug() << "bank1 conv ratio:" << this->m_trim_data.b1ConvRatio;
+    qDebug() << "bank2 conv ratio:" << this->m_trim_data.b2ConvRatio;
+    qDebug() << "bank3 conv ratio:" << this->m_trim_data.b3ConvRatio;
+    qDebug() << "bank4 conv ratio:" << this->m_trim_data.b4ConvRatio;
+    qDebug() << "ADC interval:" << this->m_trim_data.adcInt;
+    qDebug() << "Adv intreval:" << this->m_trim_data.advInt;
+
+    QByteArray bleData(sizeof(Pcba_trim_data), 0);
+    memcpy(bleData.data(), &this->m_trim_data, sizeof(Pcba_trim_data));
+    QBluetoothUuid ch, svc;
+    ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeeb}");
+    svc = QBluetoothUuid(quint16(0x1815));
+
+    write(svc, ch, bleData, true); // with write response
+}
+#endif  //PCBA_TEST_APP
 
 #if !defined(PCBA_TEST_APP)
 int BleConnection::batteryLevel() const
