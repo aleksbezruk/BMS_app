@@ -16,21 +16,8 @@ ApplicationWindow {
         y: 36
         width: 570
         height: 195
-        color: "#ffffff"
+        color: "lightgrey"
         anchors.fill: parent
-
-        gradient: Gradient {
-            GradientStop {
-                position: 0
-                color: "#6f6969"
-            }
-
-            GradientStop {
-                position: 1
-                color: "#ae8b9c"
-            }
-            orientation: Gradient.Vertical
-        }
 
         Button {
             id: scan_button
@@ -43,10 +30,23 @@ ApplicationWindow {
             font.styleName: "ExtraBold"
             font.pointSize: 14
             flat: false
-            icon.color: "#454444"
             clip: false
-            //onClicked: bmsListModel.append({"name": "Device 1", "address": "192.168.0.10"})
             onClicked: bleManager.startScan()
+
+            background: Rectangle {
+                radius: 10
+                color: scan_button.pressed ? "#5dade2" : "#85c1e9"
+                border.color: "black"
+                border.width: 1
+            }
+            scale: scan_button.pressed ? 0.95 : 1.0
+
+            contentItem: Text {
+                text: scan_button.text
+                anchors.centerIn: parent
+                font.bold: true
+                color: "black"
+            }
         }
 
         // BLE scan callbacks
@@ -88,7 +88,7 @@ ApplicationWindow {
                 width: parent.width
                 height: 60
                 border.width: 1
-                color: "grey"
+                color: "#3498db"
 
                 Column {
                     anchors.centerIn: parent
@@ -110,6 +110,21 @@ ApplicationWindow {
             font.styleName: "ExtraBold"
             font.pointSize: 14
             onClicked: bmsListModel.clear()
+
+            background: Rectangle {
+                radius: 10
+                color: stop_scan_button.pressed ? "#5dade2" : "#85c1e9"
+                border.color: "black"
+                border.width: 1
+            }
+            scale: stop_scan_button.pressed ? 0.95 : 1.0
+
+            contentItem: Text {
+                text: stop_scan_button.text
+                anchors.centerIn: parent
+                font.bold: true
+                color: "black"
+            }
         }
 
         Button {
@@ -123,6 +138,21 @@ ApplicationWindow {
             font.styleName: "ExtraBold"
             font.pointSize: 14
             onClicked: devicePopup.open()
+
+            background: Rectangle {
+                radius: 10
+                color: connect_button.pressed ? "#5dade2" : "#85c1e9"
+                border.color: "black"
+                border.width: 1
+            }
+            scale: connect_button.pressed ? 0.95 : 1.0
+
+            contentItem: Text {
+                text: connect_button.text
+                anchors.centerIn: parent
+                font.bold: true
+                color: "black"
+            }
         }
 
         Button {
@@ -136,6 +166,20 @@ ApplicationWindow {
             font.pointSize: 14
             highlighted: true
             onClicked: bleConnection.disconnectDevice()
+
+            background: Rectangle {
+                radius: 10
+                color: disconnect_button.pressed ? "#5dade2" : "#85c1e9"
+                border.color: "black"
+                border.width: 1
+            }
+            scale: disconnect_button.pressed ? 0.95 : 1.0
+            contentItem: Text {
+                text: disconnect_button.text
+                anchors.centerIn: parent
+                font.bold: true
+                color: "black"
+            }
         }
 
         // ================= DEVICE POPUP =================
@@ -202,7 +246,7 @@ ApplicationWindow {
             id: pcbaTrim_Dialog
             height: 217
             visible: bleConnection?.isConnected? true: false
-            color: "#8f7a83"
+            color: "#85c1e9"
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
@@ -575,8 +619,22 @@ ApplicationWindow {
                 anchors.rightMargin: 50
                 anchors.topMargin: 10
                 highlighted: true
-                icon.color: "#0d0c0c"
                 font.pointSize: 16
+                background: Rectangle {
+                    radius: 10
+                    color: button.pressed ? "blue" : "#5dade2"
+                    border.color: "black"
+                    border.width: 1
+                }
+                scale: button.pressed ? 0.95 : 1.0
+
+                contentItem: Text {
+                    text: button.text
+                    anchors.centerIn: parent
+                    font.bold: true
+                    color: "black"
+                }
+
                 onClicked: {
                     var buffer = new ArrayBuffer(21)
                     var view = new DataView(buffer)
