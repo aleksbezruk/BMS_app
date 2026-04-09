@@ -210,25 +210,247 @@ ApplicationWindow {
             anchors.rightMargin: 5
             anchors.bottomMargin: 15
 
-            TextInput {
-                id: modeInput
-                width: 80
-                height: 23
-                visible: true
-                text: qsTr(". . . .")
+            Rectangle {
+                id: pcbaTrim_modeDialog
+                height: 25
+                width: 30
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
                 anchors.left: parent.left
                 anchors.top: parent.top
-                anchors.leftMargin: 162
-                anchors.topMargin: 14
-                font.pixelSize: 16
-                wrapMode: Text.Wrap
-                readOnly: false
-                selectedTextColor: "#0e0d0d"
-                overwriteMode: true
-                mouseSelectionMode: TextInput.SelectCharacters
-                selectionColor: "#f9f9fe"
-                clip: false
-                font.styleName: "ExtraBold"
+                anchors.leftMargin: 175
+                anchors.topMargin: 12
+                TextInput {
+                    id: modeInput
+                    visible: true
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
+            }
+
+            Rectangle {
+                id: pcbaTrim_adcErrorDialog
+                height: 25
+                width: 30
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 175
+                anchors.topMargin: 37
+                TextInput {
+                    id: adcError_input
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
+            }
+
+            Rectangle {
+                id: pcbaTrim_bank1Dialog
+                height: 25
+                width: 100
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 175
+                anchors.topMargin: 62
+                TextInput {
+                    id: b1Ratio_input
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
+            }
+
+            Rectangle {
+                id: pcbaTrim_bank2Dialog
+                height: 25
+                width: 100
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 175
+                anchors.topMargin: 88
+                TextInput {
+                    id: b2Ratio_input
+                    width: 80
+                    height: 20
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
+            }
+
+            Rectangle {
+                id: pcbaTrim_bank3Dialog
+                height: 25
+                width: 100
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 175
+                anchors.topMargin: 114
+                TextInput {
+                    id: b3Ratio_input
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
+            }
+
+            Rectangle {
+                id: pcbaTrim_bank4Dialog
+                height: 25
+                width: 100
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 175
+                anchors.topMargin: 140
+                TextInput {
+                    id: b4Ratio_input
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
+            }
+
+            Rectangle {
+                id: pcbaTrim_adcIntDialog
+                height: 25
+                width: 30
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 175
+                anchors.topMargin: 166
+                TextInput {
+                    id: adcInt_input
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
+            }
+
+            Rectangle {
+                id: pcbaTrim_advIntDialog
+                height: 25
+                width: 60
+                visible: bleConnection?.isConnected? true: false
+                color: "lightgrey"
+                border.color: "black"
+                border.width: 1
+                radius: 4
+                anchors.left: parent.left
+                anchors.top: parent.top
+                anchors.leftMargin: 175
+                anchors.topMargin: 192
+                TextInput {
+                    id: advInt_input
+                    text: qsTr("?")
+                    anchors.left: parent.left
+                    anchors.leftMargin: 7
+                    font.pixelSize: 16
+                    wrapMode: Text.Wrap
+                    readOnly: false
+                    selectedTextColor: "#0e0d0d"
+                    overwriteMode: true
+                    mouseSelectionMode: TextInput.SelectCharacters
+                    selectionColor: "#f9f9fe"
+                    clip: false
+                    font.styleName: "ExtraBold"
+                }
             }
 
             Text {
@@ -254,20 +476,6 @@ ApplicationWindow {
                 anchors.leftMargin: 29
                 anchors.topMargin: 36
                 font.pixelSize: 16
-                font.styleName: "ExtraBold"
-            }
-
-            TextInput {
-                id: adcError_input
-                width: 80
-                height: 20
-                text: qsTr(". . . .")
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.leftMargin: 154
-                anchors.topMargin: 38
-                font.pixelSize: 16
-                cursorVisible: true
                 font.styleName: "ExtraBold"
             }
 
@@ -357,102 +565,6 @@ ApplicationWindow {
                 anchors.topMargin: 194
                 font.pixelSize: 16
                 font.styleName: "ExtraBold"
-            }
-
-            TextInput {
-                id: b1Ratio_input
-                x: 149
-                y: -730
-                width: 80
-                height: 20
-                text: qsTr(". . . .")
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.leftMargin: 175
-                anchors.topMargin: 64
-                font.pixelSize: 16
-                font.styleName: "ExtraBold"
-                cursorVisible: true
-            }
-
-            TextInput {
-                id: b2Ratio_input
-                x: 170
-                y: -704
-                width: 80
-                height: 20
-                text: qsTr(". . . .")
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.leftMargin: 175
-                anchors.topMargin: 90
-                font.pixelSize: 16
-                font.styleName: "ExtraBold"
-                cursorVisible: true
-            }
-
-            TextInput {
-                id: b3Ratio_input
-                x: 170
-                y: -704
-                width: 80
-                height: 20
-                text: qsTr(". . . .")
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.leftMargin: 175
-                anchors.topMargin: 116
-                font.pixelSize: 16
-                font.styleName: "ExtraBold"
-                cursorVisible: true
-            }
-
-            TextInput {
-                id: b4Ratio_input
-                x: 170
-                y: -704
-                width: 80
-                height: 20
-                text: qsTr(". . . .")
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.leftMargin: 175
-                anchors.topMargin: 142
-                font.pixelSize: 16
-                font.styleName: "ExtraBold"
-                cursorVisible: true
-            }
-
-            TextInput {
-                id: adcInt_input
-                x: 170
-                y: -704
-                width: 80
-                height: 20
-                text: qsTr(". . . .")
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.leftMargin: 175
-                anchors.topMargin: 168
-                font.pixelSize: 16
-                font.styleName: "ExtraBold"
-                cursorVisible: true
-            }
-
-            TextInput {
-                id: advInt_input
-                x: 170
-                y: -704
-                width: 80
-                height: 20
-                text: qsTr(". . . .")
-                anchors.left: parent.left
-                anchors.top: parent.top
-                anchors.leftMargin: 175
-                anchors.topMargin: 194
-                font.pixelSize: 16
-                font.styleName: "ExtraBold"
-                cursorVisible: true
             }
 
             Button {
