@@ -520,6 +520,41 @@ ApplicationWindow {
                     bleConnection.handleTrim(buffer)
                 }
             }
+            // BLE connection callbacks
+            Connections {
+                target: bleConnection
+                ignoreUnknownSignals: true
+
+                function onConnectedChanged() {
+                    if (!bleConnection)
+                        return
+
+                    if (bleConnection.isConnected) {
+                        console.log("BLE connected")
+                    } else {
+                        console.log("BLE disconnected")
+                        modeInput.text = qsTr("?")
+                        adcError_input.text = qsTr("?")
+                        b1Ratio_input.text =  qsTr("?")
+                        b2Ratio_input.text =  qsTr("?")
+                        b3Ratio_input.text =  qsTr("?")
+                        b4Ratio_input.text =  qsTr("?")
+                        adcInt_input.text =  qsTr("?")
+                        advInt_input.text =  qsTr("?")
+                    }
+                }
+                // Handle received trim Value
+                function onTrimReady() {
+                    modeInput.text = bleConnection.trimMode.toString()
+                    adcError_input.text = bleConnection.trimAdcError.toString()
+                    b1Ratio_input.text =  bleConnection.b1ConvRatio.toString()
+                    b2Ratio_input.text =  bleConnection.b2ConvRatio.toString()
+                    b3Ratio_input.text =  bleConnection.b3ConvRatio.toString()
+                    b4Ratio_input.text =  bleConnection.b4ConvRatio.toString()
+                    adcInt_input.text =  bleConnection.adcInt
+                    advInt_input.text =  bleConnection.advInt
+                }
+            }
         }
     }
 }

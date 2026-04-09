@@ -38,6 +38,15 @@ class BleConnection : public QObject
     Q_PROPERTY(qint16 bank2Volt READ bank2Volt NOTIFY bank2VoltChanged)
     Q_PROPERTY(qint16 bank3Volt READ bank3Volt NOTIFY bank3VoltChanged)
     Q_PROPERTY(qint16 bank4Volt READ bank4Volt NOTIFY bank4VoltChanged)
+#else
+    Q_PROPERTY(quint8 trimMode READ trimMode NOTIFY trimReady)
+    Q_PROPERTY(quint8 trimAdcError READ trimAdcError NOTIFY trimReady)
+    Q_PROPERTY(quint32 b1ConvRatio READ b1ConvRatio NOTIFY trimReady)
+    Q_PROPERTY(quint32 b2ConvRatio READ b2ConvRatio NOTIFY trimReady)
+    Q_PROPERTY(quint32 b3ConvRatio READ b3ConvRatio NOTIFY trimReady)
+    Q_PROPERTY(quint32 b4ConvRatio READ b4ConvRatio NOTIFY trimReady)
+    Q_PROPERTY(quint8 adcInt READ adcInt NOTIFY trimReady)
+    Q_PROPERTY(quint16 advInt READ advInt NOTIFY trimReady)
 #endif  //PCBA_TEST_APP
 
 public:
@@ -62,6 +71,14 @@ public:
 
 #if defined(PCBA_TEST_APP)
     Q_INVOKABLE void handleTrim(const QByteArray &data);
+    quint8 trimMode() { return m_trim_data.mode; }
+    quint8 trimAdcError() { return m_trim_data.adcErr; }
+    quint32 b1ConvRatio() { return m_trim_data.b1ConvRatio; }
+    quint32 b2ConvRatio() { return m_trim_data.b2ConvRatio; }
+    quint32 b3ConvRatio() { return m_trim_data.b3ConvRatio; }
+    quint32 b4ConvRatio() { return m_trim_data.b4ConvRatio; }
+    quint8 adcInt() { return m_trim_data.adcInt; }
+    quint16 advInt() { return m_trim_data.advInt; }
 #endif  //PCBA_TEST_APP
 
 #if !defined(PCBA_TEST_APP)
@@ -97,6 +114,8 @@ signals:
     void bank2VoltChanged();
     void bank3VoltChanged();
     void bank4VoltChanged();
+#else
+    void trimReady();
 #endif  //PCBA_TEST_APP
 
 public slots:

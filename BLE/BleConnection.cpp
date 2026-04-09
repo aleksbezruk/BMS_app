@@ -93,7 +93,7 @@ void BleConnection::on_servicesReady()
     QBluetoothUuid aios_svc = QBluetoothUuid(quint16(0x1815));
     enableNotifications(aios_svc, aios_ch);
 #else
-    // TODO: implement for PCBA test app
+    readChar(0x9AE3);   // read trim data
 #endif  //PCBA_TEST_APP
 }
 
@@ -198,7 +198,8 @@ void BleConnection::on_readCompleted(QBluetoothUuid s, QBluetoothUuid c, QByteAr
         case 0x9AE3:
         {
             qDebug() << "[AIOS], " << "PCBA: " << data;
-            // TODO: implement fo PCBA test trim
+            memcpy(&this->m_trim_data, data.data(), sizeof(Pcba_trim_data));
+            emit trimReady();
             break;
         }
 #endif  //PCBA_TEST_APP
@@ -266,10 +267,13 @@ void BleConnection::readChar(unsigned int uuid)
     } else if (uuid == 0x2BB4) {
         // Bank4 in mV
         ch = QBluetoothUuid("{170ad8db-5244-4926-963e-417099122bb4}");
-    } else if (uuid == 0x9AE3) {
+    }
+#if defined(PCBA_TEST_APP)
+    else if (uuid == 0x9AE3) {
         // 128-bit UUIDs
         ch = QBluetoothUuid("{37af9ae2-211d-4436-9d26-3a9ed02efeeb}");
     }
+#endif  //PCBA_TEST_APP
     else {
         // 16-bit UUIDs
         ch = QBluetoothUuid(quint16(uuid));
